@@ -118,13 +118,12 @@ public class Video implements Initializable{
     }
 
     public void progressBarDebut() {
-        sliderDebug = true;
+        sliderDebug = false;
+
     }
 
     public void progressBarFin(){
-        sliderDebug = false;
         mp.seek(Duration.seconds((progressSlider.getValue() * mp.getTotalDuration().toSeconds()) / 100));
-
-
+        sliderDebug = true;
     }
 }
