@@ -17,6 +17,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.media.MediaView?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="794.0" prefWidth="1299.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="model.Video">
    <children>
@@ -66,24 +67,50 @@
             </HBox>
          </children>
       </VBox>
-      <VBox layoutX="687.0" layoutY="80.0" prefHeight="360.0" prefWidth="583.0">
+      <VBox layoutX="686.0" layoutY="80.0" prefHeight="380.0" prefWidth="607.0" AnchorPane.bottomAnchor="350.0" AnchorPane.rightAnchor="3.0">
          <children>
-            <MediaView fx:id="mv" fitHeight="320.0" fitWidth="480.0">
+            <HBox prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <MediaView fx:id="mv" fitHeight="320.0" fitWidth="480.0">
+                     <HBox.margin>
+                        <Insets left="90.0" />
+                     </HBox.margin>
+                  </MediaView>
+                  <VBox prefHeight="320.0" prefWidth="0.0">
+                     <children>
+                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="volume">
+                           <VBox.margin>
+                              <Insets left="5.0" top="200.0" />
+                           </VBox.margin>
+                        </Text>
+                        <Slider fx:id="volumeSlider" maxHeight="250.0" maxWidth="222.0" orientation="VERTICAL" prefHeight="142.0" prefWidth="44.0">
+                           <VBox.margin>
+                              <Insets bottom="5.0" />
+                           </VBox.margin>
+                        </Slider>
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+            <Slider fx:id="progressSlider" onDragDetected="#progressBarDebut" onMouseClicked="#progressBarDebut" onMouseReleased="#progressBarFin" prefHeight="14.0" prefWidth="579.0">
                <VBox.margin>
-                  <Insets left="40.0" />
+                  <Insets left="10.0" />
                </VBox.margin>
-            </MediaView>
-            <Slider fx:id="progressionVideo" />
-            <ButtonBar prefHeight="26.0" prefWidth="326.0">
+            </Slider>
+            <ButtonBar prefHeight="46.0" prefWidth="599.0">
               <buttons>
-                  <Button fx:id="playPause" mnemonicParsing="false" onAction="#pause" text="▶||">
+                  <Button fx:id="playPause" mnemonicParsing="false" onAction="#pausePlay" text="▶||">
                      <font>
                         <Font size="21.0" />
                      </font>
                   </Button>
-                <Button fx:id="recommencer" mnemonicParsing="false" onAction="#recommencer" prefHeight="46.0" text="Recommencer" />
-                  <Button fx:id="reculer" mnemonicParsing="false" prefHeight="50.0" prefWidth="144.0" text="Reculer de 5 sec" />
-                  <Button fx:id="avancer" mnemonicParsing="false" prefHeight="50.0" text="Avancer de 5 sec" />
+                <Button fx:id="recommencer" mnemonicParsing="false" onAction="#recommencer" prefHeight="46.0" text="Recommencer">
+                     <font>
+                        <Font size="11.0" />
+                     </font></Button>
+                  <Button fx:id="reculer" mnemonicParsing="false" onAction="#reculer" prefHeight="50.0" prefWidth="144.0" text="Reculer " />
+                  <Button fx:id="avancer" mnemonicParsing="false" onAction="#avancer" prefHeight="46.0" text="Avancer" />
+                  <Button fx:id="mute" minWidth="11.0" mnemonicParsing="false" onAction="#mute" prefHeight="118.0" text="mute" />
               </buttons>
             </ButtonBar>
          </children>
