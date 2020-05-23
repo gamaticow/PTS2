@@ -28,6 +28,7 @@ import static javafx.scene.media.MediaPlayer.Status.PLAYING;
 public class Video implements Initializable{
     private boolean sliderDebug = true; //permet de debug le multiclique pour changer le temps de la vidéo
 
+    public static int compteurDebug = -1; //permet de debug le fait que la fonction progressBarDebut soit appelé au debut et a la fin du changement de temps.
     @FXML
     private MediaView mv;
     private MediaPlayer mp;
@@ -74,15 +75,13 @@ public class Video implements Initializable{
         mp.currentTimeProperty().addListener(new ChangeListener<Duration>() {
             @Override
             public void changed(ObservableValue<? extends Duration> observableValue, Duration duration, Duration current) {
-               if (sliderDebug) progressSlider.setValue((current.toSeconds() / mp.getTotalDuration().toSeconds()) * 100);
+                if (sliderDebug) progressSlider.setValue((current.toSeconds() / mp.getTotalDuration().toSeconds()) * 100);
             }
         });
 
     }
 
     public void pausePlay(){
-        boolean atEndOfMedia = false;
-
         if (PLAYING == mp.getStatus()){
             mp.pause();
         }
@@ -107,7 +106,6 @@ public class Video implements Initializable{
         Double temps;
         temps = mp.getCurrentTime().toSeconds() + 5;
         mp.seek(Duration.seconds(temps));
-
     }
 
     public void mute(){
@@ -119,11 +117,14 @@ public class Video implements Initializable{
         }
     }
 
-    public void progressBarDebut(){
-       sliderDebug = false;
-    }
-    public void progressBarFin(){
-        mp.seek(Duration.seconds((progressSlider.getValue() * mp.getTotalDuration().toSeconds()) / 100));
+    public void progressBarDebut() {
         sliderDebug = true;
+    }
+
+    public void progressBarFin(){
+        sliderDebug = false;
+        mp.seek(Duration.seconds((progressSlider.getValue() * mp.getTotalDuration().toSeconds()) / 100));
+
+
     }
 }
