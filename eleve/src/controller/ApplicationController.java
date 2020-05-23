@@ -42,7 +42,6 @@ public class ApplicationController {
                 fileError.setHeaderText("Fichier non compatible");
                 fileError.setContentText("Le fichier ne peut pas être ouvert");
                 fileError.show();
-                return;
             }
         } catch (IOException | ClassNotFoundException e) {
             Alert fileError = new Alert(Alert.AlertType.WARNING);
@@ -51,13 +50,13 @@ public class ApplicationController {
             fileError.show();
         }finally {
             //TODO mettre la première partie de l'exercice
-            demarerPartie(null);
+            demarrerPartie(null);
         }
     }
 
-    private void demarerPartie(Partie partie){
+    private void demarrerPartie(Partie partie){
         //TODO afficher le texte de la partie
-        //TODO cacher le bouton indice s'il n'est pas disponible
+        //TODO cacher le bouton aide s'il n'est pas disponible
         //TODO cacher le bouton solution si elle n'est pas autorise
         texte.setText(partie.texteAAficherEtudiant());
     }
