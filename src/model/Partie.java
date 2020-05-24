@@ -56,4 +56,9 @@ public class Partie implements Serializable {
     }
 
     //==============================================================================================FONCTIONS PROFESSEUR
+
+
+    public Indice getIndice() {
+        return indice;
+    }
 }
