@@ -33,16 +33,50 @@ public class Texte implements Serializable {
      * texte_découvert : cacher
      * @param mot : mot_a_cherche
      * @param debut_recherche : Mettre a 0 pour commencer la recherche au debut du texte
+     * @param modeCherche :
      * @return Retourne si une occurence a été trouvé
      * <ul>
-     *     <li>true : Au moin une occurence a été trouvé</li>
+     *     <li>true : Au moins une occurence a été trouvé</li>
      *     <li>false : Aucune occurence a été trouvé</li>
      * </ul>
      */
-    public boolean chercherMot(String mot, int debut_recherche){
-        //TODO faire ca
-        //TODO et le modifier un peut pour le retour
-        return false;
+    public boolean chercherMot(String mot, int debut_recherche, boolean modeCherche){
+
+        int debut =0;
+        int caractere_trouver=0;
+        boolean trouver = false;
+
+        for (int i=debut_recherche;i<texte_decouvert.length();i++){
+            if (caractere_trouver==mot.length()){
+                if (!CARACTERE_DE_SUBSTITUTION.equals(texte.charAt(i))){
+                    caractere_trouver=0;
+                    continue;
+                }
+                trouver=true;
+                break;
+            }
+            if (texte_decouvert.charAt(i)==mot.charAt(caractere_trouver)){
+                if (caractere_trouver==0){
+                    debut=i;
+                }
+                caractere_trouver++;
+            }
+            else{
+                caractere_trouver=0;
+            }
+        }
+
+        if (trouver==true){
+            for (int i=debut;i<(debut+caractere_trouver);i++){
+                replaceChar(texte,texte_decouvert.charAt(i),i);
+            }
+            System.out.println(texte_decouvert+" "+texte+" "+mot+" "+ (debut+caractere_trouver));
+
+        }
+        else{
+            System.out.println(texte);
+        }
+        return true;
     }
 
 
@@ -63,4 +97,7 @@ public class Texte implements Serializable {
         return texte;
     }
 
+    public String replaceChar(String str, char ch, int index) {
+        return str.substring(0, index) + ch + str.substring(index+1);
+    }
 }
