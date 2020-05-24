@@ -35,7 +35,7 @@ public class Texte implements Serializable {
      * @param debut_recherche : Mettre a 0 pour commencer la recherche au debut du texte
      * @return Retourne si une occurence a été trouvé
      * <ul>
-     *     <li>true : Au moin une occurence a été trouvé</li>
+     *     <li>true : Au moins une occurence a été trouvé</li>
      *     <li>false : Aucune occurence a été trouvé</li>
      * </ul>
      */
@@ -62,5 +62,6 @@ public class Texte implements Serializable {
     public String getOriginal(){
         return texte;
     }
+
 
 }
