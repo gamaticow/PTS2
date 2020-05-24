@@ -48,6 +48,7 @@ public class ApplicationController implements Initializable {
     @FXML private Slider volumeSlider;
     @FXML private Slider progressSlider;
     @FXML private TextArea consigne;
+    @FXML private Button validerProposition;
 
     private boolean sliderDebug = true; //permet de debug le multiclique pour changer le temps de la vidéo
 
@@ -81,7 +82,10 @@ public class ApplicationController implements Initializable {
             for (Partie partie : exercice.getParties()){
                 parties.getTabs().add(new Tab(partie.getNom()));
             }
+            consigne.setText(exercice.getConsigne());
             changerPartie();
+            if(!exercice.getSolution().isSolution_autorise())
+                solution.setVisible(false);
         }
     }
 
@@ -92,6 +96,18 @@ public class ApplicationController implements Initializable {
     public void changerPartie(){
         Partie partie = getSelectedPartie();
         texte.setText(!exercice.isSolutionUtilise() ? partie.texteAAficherEtudiant() : partie.getTexte().getOriginal());
+
+        if(partie.getIndice().indiceUtilise()){
+            aideTexte.setText(partie.getIndice().getIndice());
+        }else {
+            aideTexte.setText("");
+        }
+
+        //cacher le bouton aide
+        if(partie.getIndice().indiceUtilisable() && !partie.getIndice().indiceUtilise() && !exercice.isSolutionUtilise())
+            aide.setVisible(true);
+        else
+            aide.setVisible(false);
     }
 
     @Override
@@ -166,12 +182,13 @@ public class ApplicationController implements Initializable {
     }
 
     public void aide(){
-        aideTexte.clear();
-        aideTexte.insertText( aideTexte.getLength(), "ceci est une aide");
+        getSelectedPartie().getIndice().utiliserIndice();
+        changerPartie();
     }
 
     public void solution(){
         exercice.getSolution().utiliseSolution();
         changerPartie();
+        validerProposition.setVisible(false);
     }
 }

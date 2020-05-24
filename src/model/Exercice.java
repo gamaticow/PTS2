@@ -10,6 +10,7 @@ import java.util.List;
 public class Exercice implements Serializable {
 
     private String nom;
+    private String consigne;
 
     private Media media;
     private List<Partie> parties;
@@ -40,6 +41,10 @@ public class Exercice implements Serializable {
         return solution;
     }
 
+    public String getConsigne(){
+        return consigne;
+    }
+
     //================================================================================================FONCTIONS ETUDIANT
 
     public boolean isSolutionUtilise(){
@@ -50,5 +55,9 @@ public class Exercice implements Serializable {
 
     public void createPartie(String nom) {
         parties.add(new Partie(nom));
+    }
+
+    public void setConsigne(String consigne){
+        this.consigne = consigne;
     }
 }

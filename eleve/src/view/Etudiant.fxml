@@ -106,7 +106,7 @@
                   <Font name="System Bold" size="16.0" />
                </font>
             </Label>
-            <TextArea fx:id="Consigne" editable="false" prefHeight="169.0" prefWidth="480.0" />
+            <TextArea fx:id="consigne" editable="false" prefHeight="169.0" prefWidth="480.0" />
          </children>
       </VBox>
       <MenuBar prefHeight="26.0" prefWidth="1299.0">
@@ -126,6 +126,6 @@
           </Menu>
         </menus>
       </MenuBar>
-      <TextArea fx:id="texte" layoutX="41.0" layoutY="80.0" prefHeight="432.0" prefWidth="638.0" />
+      <TextArea fx:id="texte" editable="false" layoutX="41.0" layoutY="80.0" prefHeight="432.0" prefWidth="638.0" />
    </children>
 </AnchorPane>
