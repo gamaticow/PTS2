@@ -29,35 +29,25 @@ import java.util.ResourceBundle;
 
 import static javafx.scene.media.MediaPlayer.Status.PLAYING;
 
-public class ApplicationController implements Initializable{
+public class ApplicationController implements Initializable {
 
     //TAG FXML
+    @FXML private TabPane parties;
     @FXML private MediaView mv;
     @FXML private TextArea texte;
     @FXML private TextArea aideTexte;
-    @FXML
-    private Media me;
+    @FXML private Media me;
     private MediaPlayer mp;
-    @FXML
-    private Button playPause;
-    @FXML
-    private Button mute;
-    @FXML
-    private Button avancer;
-    @FXML
-    private Button reculer;
-    @FXML
-    private Button recommencer;
-    @FXML
-    private Button aide;
-    @FXML
-    private Button solution;
-    @FXML
-    private Slider volumeSlider;
-    @FXML
-    private Slider progressSlider;
-    @FXML
-    private TextArea consigne;
+    @FXML private Button playPause;
+    @FXML private Button mute;
+    @FXML private Button avancer;
+    @FXML private Button reculer;
+    @FXML private Button recommencer;
+    @FXML private Button aide;
+    @FXML private Button solution;
+    @FXML private Slider volumeSlider;
+    @FXML private Slider progressSlider;
+    @FXML private TextArea consigne;
 
     private boolean sliderDebug = true; //permet de debug le multiclique pour changer le temps de la vidéo
 
@@ -88,27 +78,30 @@ public class ApplicationController implements Initializable{
             fileError.setContentText("Une erreur interne c'est produite");
             fileError.show();
         }finally {
-            //TODO mettre la première partie de l'exercice
-            demarrerPartie(null);
+            for (Partie partie : exercice.getParties()){
+                parties.getTabs().add(new Tab(partie.getNom()));
+            }
+            changerPartie();
         }
     }
 
-    private void demarrerPartie(Partie partie){
-        //TODO afficher le texte de la partie
-        //TODO cacher le bouton aide s'il n'est pas disponible
-        //TODO cacher le bouton solution si elle n'est pas autorise
-        texte.setText(partie.texteAAficherEtudiant());
+    public Partie getSelectedPartie(){
+        return exercice.getPartie(parties.getSelectionModel().getSelectedItem().getText());
     }
 
-
+    public void changerPartie(){
+        Partie partie = getSelectedPartie();
+        texte.setText(!exercice.isSolutionUtilise() ? partie.texteAAficherEtudiant() : partie.getTexte().getOriginal());
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources){
-        String path = new File("I:/video/Takagi san/Karakai Jouzu No Takagi-San 1.mp4").getAbsolutePath();
+        chargerExercice("test.caft");
+        /*String path = new File("I:/video/Takagi san/Karakai Jouzu No Takagi-San 1.mp4").getAbsolutePath();
         me = new Media(new File(path).toURI().toString());
         mp = new MediaPlayer(me);
         mv.setMediaPlayer(mp);
-        mp.setAutoPlay(true);
+        mp.setAutoPlay(false);
         DoubleProperty width = mv.fitWidthProperty();
         DoubleProperty height = mv.fitWidthProperty();
         volumeSlider.setValue(mp.getVolume() * 100);
@@ -123,15 +116,14 @@ public class ApplicationController implements Initializable{
             public void changed(ObservableValue<? extends Duration> observableValue, Duration duration, Duration current) {
                 if (sliderDebug) progressSlider.setValue((current.toSeconds() / mp.getTotalDuration().toSeconds()) * 100);
             }
-        });
+        });*/
 
     }
 
     public void pausePlay(){
         if (PLAYING == mp.getStatus()){
             mp.pause();
-        }
-        else{
+        } else{
             mp.play();
         }
 
@@ -179,7 +171,7 @@ public class ApplicationController implements Initializable{
     }
 
     public void solution(){
-        texte.clear();
-        texte.insertText( texte.getLength(), "ceci est une solution");
+        exercice.getSolution().utiliseSolution();
+        changerPartie();
     }
 }
