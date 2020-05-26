@@ -33,16 +33,16 @@ public class Exercice implements Serializable {
         return null;
     }
 
-    public Partie getDefaultPartie(){
-        return parties.get(0);
-    }
-
     public Solution getSolution(){
         return solution;
     }
 
     public String getConsigne(){
         return consigne;
+    }
+
+    public Media getMedia(){
+        return media;
     }
 
     //================================================================================================FONCTIONS ETUDIANT
@@ -59,5 +59,9 @@ public class Exercice implements Serializable {
 
     public void setConsigne(String consigne){
         this.consigne = consigne;
+    }
+
+    public void setMedia(Media media){
+        this.media = media;
     }
 }

@@ -61,7 +61,7 @@
                               <Insets left="5.0" top="200.0" />
                            </VBox.margin>
                         </Text>
-                        <Slider fx:id="volumeSlider" maxHeight="250.0" maxWidth="222.0" orientation="VERTICAL" prefHeight="142.0" prefWidth="44.0">
+                        <Slider fx:id="volumeSlider" maxHeight="250.0" maxWidth="222.0" onMouseReleased="#volumeSlider" orientation="VERTICAL" prefHeight="142.0" prefWidth="44.0" value="100.0">
                            <VBox.margin>
                               <Insets bottom="5.0" />
                            </VBox.margin>
