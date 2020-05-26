@@ -3,25 +3,20 @@ package core;
  *   Created by Corentin on 20/05/2020 at 00:43
  */
 
-import model.Exercice;
 
-import java.io.*;
+import controller.ProfesseurController;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
-public class ReconstitutionProfesseur {
+public class ReconstitutionProfesseur extends Application {
 
-    public static void main(String[] args) throws IOException {
-        Exercice exercice = new Exercice();
-        exercice.setConsigne("Traduire la vidéo");
-        exercice.createPartie("Test 1");
-        exercice.getPartie("Test 1").getTexte().setOriginal("Salut les BGs");
-        exercice.createPartie("Partie 2");
-        exercice.getPartie("Partie 2").getTexte().setOriginal("Texte de test vurgz feiuha feaif heuaifhaufuieza hfuehza iufhaeiu fheiau fjkhkjh");
-        exercice.getPartie("Partie 2").getIndice().setIndice("C'est vachement compliqué");
-        exercice.getSolution().setSolution_autorise(true);
-
-        FileOutputStream fos = new FileOutputStream("test.caft");
-        ObjectOutputStream oos = new ObjectOutputStream(fos);
-        oos.writeObject(exercice);
+    public void start(Stage primaryStage) throws Exception {
+        Parent root = FXMLLoader.load(getClass().getResource("../view/Professeur.fxml"));
+        primaryStage.setTitle("Reconstitution version professeur");
+        primaryStage.setScene(new Scene(root));
+        primaryStage.show();
     }
-
 }
