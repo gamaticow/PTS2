@@ -16,6 +16,7 @@ public class ReconstitutionEleve extends Application {
         Parent root = FXMLLoader.load(getClass().getResource("../view/Etudiant.fxml"));
         primaryStage.setTitle("Reconstitution version étudiant");
         primaryStage.setScene(new Scene(root));
+        primaryStage.setResizable(false);
         primaryStage.show();
     }
 }
