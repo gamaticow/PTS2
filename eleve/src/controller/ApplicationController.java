@@ -3,22 +3,12 @@ package controller;
  *   Created by Corentin on 20/05/2020 at 00:52
  */
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
-import javafx.util.Duration;
 import model.Exercice;
 import model.Partie;
-import model.Solution;
-import model.Texte;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,35 +19,24 @@ import java.util.ResourceBundle;
 
 import static javafx.scene.media.MediaPlayer.Status.PLAYING;
 
-public class ApplicationController implements Initializable{
+public class ApplicationController implements Initializable {
 
     //TAG FXML
+    @FXML private TabPane parties;
     @FXML private MediaView mv;
     @FXML private TextArea texte;
     @FXML private TextArea aideTexte;
-    @FXML
-    private Media me;
-    private MediaPlayer mp;
-    @FXML
-    private Button playPause;
-    @FXML
-    private Button mute;
-    @FXML
-    private Button avancer;
-    @FXML
-    private Button reculer;
-    @FXML
-    private Button recommencer;
-    @FXML
-    private Button aide;
-    @FXML
-    private Button solution;
-    @FXML
-    private Slider volumeSlider;
-    @FXML
-    private Slider progressSlider;
-    @FXML
-    private TextArea consigne;
+    @FXML private Button playPause;
+    @FXML private Button mute;
+    @FXML private Button avancer;
+    @FXML private Button reculer;
+    @FXML private Button recommencer;
+    @FXML private Button aide;
+    @FXML private Button solution;
+    @FXML private Slider volumeSlider;
+    @FXML private Slider progressSlider;
+    @FXML private TextArea consigne;
+    @FXML private Button validerProposition;
 
     private boolean sliderDebug = true; //permet de debug le multiclique pour changer le temps de la vidéo
 
@@ -82,104 +61,132 @@ public class ApplicationController implements Initializable{
                 fileError.setContentText("Le fichier ne peut pas être ouvert");
                 fileError.show();
             }
+            ois.close();
         } catch (IOException | ClassNotFoundException e) {
             Alert fileError = new Alert(Alert.AlertType.WARNING);
             fileError.setHeaderText("Une erreur c'est produite");
             fileError.setContentText("Une erreur interne c'est produite");
             fileError.show();
         }finally {
-            //TODO mettre la première partie de l'exercice
-            demarrerPartie(null);
+            for (Partie partie : exercice.getParties()){
+                parties.getTabs().add(new Tab(partie.getNom()));
+            }
+            consigne.setText(exercice.getConsigne());
+            changerPartie();
+            if(!exercice.getSolution().isSolution_autorise())
+                solution.setVisible(false);
         }
     }
 
-    private void demarrerPartie(Partie partie){
-        //TODO afficher le texte de la partie
-        //TODO cacher le bouton aide s'il n'est pas disponible
-        //TODO cacher le bouton solution si elle n'est pas autorise
-        texte.setText(partie.texteAAficherEtudiant());
+    public Partie getSelectedPartie(){
+        if(exercice == null) return null;
+
+        return exercice.getPartie(parties.getSelectionModel().getSelectedItem().getText());
     }
 
+    public void changerPartie(){
+        if(exercice == null) return;
 
+        Partie partie = getSelectedPartie();
+        texte.setText(!exercice.isSolutionUtilise() ? partie.texteAAficherEtudiant() : partie.getTexte().getOriginal());
+
+        if(partie.getIndice().indiceUtilise()){
+            aideTexte.setText(partie.getIndice().getIndice());
+        }else {
+            aideTexte.setText("");
+        }
+
+        //cacher le bouton aide
+        if(partie.getIndice().indiceUtilisable() && !partie.getIndice().indiceUtilise() && !exercice.isSolutionUtilise())
+            aide.setVisible(true);
+        else
+            aide.setVisible(false);
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources){
-        String path = new File("I:/video/Takagi san/Karakai Jouzu No Takagi-San 1.mp4").getAbsolutePath();
-        me = new Media(new File(path).toURI().toString());
-        mp = new MediaPlayer(me);
-        mv.setMediaPlayer(mp);
-        mp.setAutoPlay(true);
-        DoubleProperty width = mv.fitWidthProperty();
-        DoubleProperty height = mv.fitWidthProperty();
-        volumeSlider.setValue(mp.getVolume() * 100);
-        volumeSlider.valueProperty().addListener(new InvalidationListener() {
-            @Override
-            public void invalidated(Observable observable) {
-                mp.setVolume(volumeSlider.getValue() / 100);
-            }
-        });
-        mp.currentTimeProperty().addListener(new ChangeListener<Duration>() {
-            @Override
-            public void changed(ObservableValue<? extends Duration> observableValue, Duration duration, Duration current) {
-                if (sliderDebug) progressSlider.setValue((current.toSeconds() / mp.getTotalDuration().toSeconds()) * 100);
-            }
-        });
-
+        chargerExercice("test.caft");
+        exercice.getMedia().initialize();
+        exercice.getMedia().load(mv);
     }
 
     public void pausePlay(){
-        if (PLAYING == mp.getStatus()){
-            mp.pause();
-        }
-        else{
-            mp.play();
+        if(exercice == null) return;
+
+        if (exercice.getMedia().isPlaying()){
+            exercice.getMedia().pause();
+        } else{
+            exercice.getMedia().play();
         }
 
     }
 
     public void recommencer(){
-        mp.stop();
-        mp.play();
+        if(exercice == null) return;
+
+        exercice.getMedia().recommencer();
     }
 
     public void reculer(){
-        Double temps;
-        temps = mp.getCurrentTime().toSeconds() - 5;
-        mp.seek(Duration.seconds(temps));
+        if(exercice == null) return;
+
+        exercice.getMedia().reculer(5);
     }
 
     public void avancer(){
-        Double temps;
-        temps = mp.getCurrentTime().toSeconds() + 5;
-        mp.seek(Duration.seconds(temps));
+        if(exercice == null) return;
+
+        exercice.getMedia().avancer(5);
     }
 
+
+    private double lastVolume = 10;
     public void mute(){
-        double volumeBase = 10;
-        if (mp.getVolume() != 0){
-            mp.setVolume(0);
+        if(exercice == null) return;
+        System.out.println(lastVolume);
+
+        if (exercice.getMedia().getVolume() == 0){
+            exercice.getMedia().setVolume(lastVolume/100);
+            volumeSlider.setValue(lastVolume);
         }else{
-            mp.setVolume(volumeBase);
+            exercice.getMedia().setVolume(0);
+            volumeSlider.setValue(0);
         }
     }
 
+    public void volumeSlider(){
+        if(exercice == null) return;
+
+        lastVolume = volumeSlider.getValue();
+        exercice.getMedia().setVolume(lastVolume/100);
+    }
+
     public void progressBarDebut() {
+        if(exercice == null) return;
+
         sliderDebug = false;
 
     }
 
     public void progressBarFin(){
+        /*if(exercice == null) return;
+
         mp.seek(Duration.seconds((progressSlider.getValue() * mp.getTotalDuration().toSeconds()) / 100));
-        sliderDebug = true;
+        sliderDebug = true;*/
     }
 
     public void aide(){
-        aideTexte.clear();
-        aideTexte.insertText( aideTexte.getLength(), "ceci est une aide");
+        if(exercice == null) return;
+
+        getSelectedPartie().getIndice().utiliserIndice();
+        changerPartie();
     }
 
     public void solution(){
-        texte.clear();
-        texte.insertText( texte.getLength(), "ceci est une solution");
+        if(exercice == null) return;
+
+        exercice.getSolution().utiliseSolution();
+        changerPartie();
+        validerProposition.setVisible(false);
     }
 }
