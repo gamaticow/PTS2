@@ -1,8 +1,18 @@
 package controller;
 
+import core.ReconstitutionProfesseur;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import model.Exercice;
+
+import javax.imageio.ImageIO;
+import javax.swing.text.StyledEditorKit;
+import java.io.File;
+import java.io.IOException;
+import java.util.Optional;
 
 
 public class ProfesseurController {
@@ -19,36 +29,18 @@ public class ProfesseurController {
     public CheckBox CB6;   //Sensibilité aux accents
     public TabPane Sections;   //TabPane contenant toutes les sections
     public Tab Section1;   //Section 1
-    public Tab Section2;   //Section 2
-    public Tab Section3;   //Section 3
-    public Tab Section4;   //Section 4
-    public Tab Section5;   //Section 5
-    public Tab addSection;
-    public Button DeleteS2;
-    public Button DeleteS3;
-    public Button DeleteS4;
-    public Button DeleteS5;
-    public TextArea TextSection1;
-    public TextArea TextSection2;
-    public TextArea TextSection3;
-    public TextArea TextSection4;
-    public TextArea TextSection5;
-    public TextArea TextAddSection;
+    public Tab Section11;   //Section 1
+    public Tab SectionAdd;
     public MenuItem HandicapVisuel;
     public MenuItem HandicapAuditif;
 
-    private int NbSection; //Nombre de section
-    private Exercice exercice;
-
+    private int NbSection = 2; //Nombre de section
+    private Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+    private Tab lastTab;
+    private Boolean aBoolean = false;
 
     public void initialize() {
-        exercice = new Exercice();
-        TextSection1.setText(null);
-        TextSection2.setText(null);
-        TextSection3.setText(null);
-        TextSection4.setText(null);
-        TextSection5.setText(null);
-        TextAddSection.setText(null);
+        aBoolean = false;
         Consigne.setText(null);
         Aide.setText(null);
         Aide.setEditable(true);
@@ -59,105 +51,112 @@ public class ProfesseurController {
         CB4.setSelected(true);
         CB5.setSelected(false);
         CB6.setSelected(false);
-        Sections.getTabs().removeAll(Section1, Section2, Section3, Section4, Section5, addSection);
-        Sections.getTabs().addAll(Section1, addSection);
+        Sections.getTabs().removeAll(Sections.getTabs());
+        Sections.getTabs().removeAll(Sections.getTabs());
+        Sections.getTabs().addAll(SectionAdd, Section1, Section11);
+        lastTab = Section1;
         NbSection=1;
+        Sections.getSelectionModel().select(Section1);
+        aBoolean = true;
     }
 
-    public void deleteSection2() {
-        if (NbSection > 2) {
-            switch (NbSection) {
-                case 3:
-                    TextSection2.setText(TextSection3.getText());
-                    Sections.getTabs().remove(Section3);
-                    break;
-                case 4:
-                    TextSection2.setText(TextSection3.getText());
-                    TextSection3.setText(TextSection4.getText());
-                    Sections.getTabs().remove(Section4);
-                    break;
-                case 5:
-                    TextSection2.setText(TextSection3.getText());
-                    TextSection3.setText(TextSection4.getText());
-                    TextSection4.setText(TextSection5.getText());
-                    Sections.getTabs().remove(Section5);
-                    break;
-            }
-        } else {
-            Sections.getTabs().remove(Section2);
+    public void dialogConfirmNewPrjct() {
+        alert.setTitle("Nouveau");
+        alert.setHeaderText("Voulez vous enregistrer votre exercice avant de le quitter");
+        //alert.setContentText("Choose your option.");
+        ButtonType buttonTypeOne = new ButtonType("Oui, sauvegarder");
+        ButtonType buttonTypeTwo = new ButtonType("Ne pas sauvegarder");
+        ButtonType buttonTypeCancel = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeCancel);
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == buttonTypeOne){
+            importer();
+        } else if (result.get() == buttonTypeTwo) {
+            initialize();
         }
-        NbSection--;
-        Sections.getTabs().add(addSection);
     }
 
-    public void deleteSection3() {
-        if (NbSection > 3) {
-            switch (NbSection) {
-                case 4:
-                    TextSection3.setText(TextSection4.getText());
-                    Sections.getTabs().remove(Section4);
-                    break;
-                case 5:
-                    TextSection3.setText(TextSection4.getText());
-                    TextSection4.setText(TextSection5.getText());
-                    Sections.getTabs().remove(Section5);
-                    break;
-            }
-        } else {
-            Sections.getTabs().remove(Section3);
+    public void dialogConfirmLeave() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Nouveau");
+        alert.setHeaderText("Voulez vous enregistrer votre exercice avant de le quitter");
+        //alert.setContentText("Choose your option.");
+        ButtonType buttonTypeOne = new ButtonType("Oui, sauvegarder");
+        ButtonType buttonTypeTwo = new ButtonType("Ne pas sauvegarder");
+        ButtonType buttonTypeCancel = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeCancel);
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == buttonTypeOne){
+            importer();
+        } else if (result.get() == buttonTypeTwo) {
+            ReconstitutionProfesseur.leave();
         }
-        NbSection--;
-        Sections.getTabs().add(addSection);
     }
 
-    public void deleteSection4() {
-        if (NbSection > 4) {
-            TextSection4.setText(TextSection5.getText());
-            Sections.getTabs().remove(Section5);
-        } else {
-            Sections.getTabs().remove(Section4);
+    public void dialogConfirmDeleteSection() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Supprimer la section");
+        alert.setHeaderText("Etes vous sûr de vouloir supprimer la section ?");
+        //alert.setContentText("Choose your option.");
+        ButtonType buttonTypeOne = new ButtonType("Oui, supprimer");
+        ButtonType buttonTypeCancel = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeCancel);
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == buttonTypeOne){
+            aBoolean = false;
+            deleteSection();
         }
-        NbSection--;
-        Sections.getTabs().add(addSection);
     }
 
-    public void deleteSection5() {
-        Sections.getTabs().remove(Section5);
-        NbSection--;
-        Sections.getTabs().add(addSection);
+    public void renameSection() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Renommer : " + Sections.getSelectionModel().getSelectedItem().getText());
+        dialog.setHeaderText("Nouveau nom de la section");
+
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            if (result.get().length() >= 1) {
+                aBoolean = false;
+                Sections.getSelectionModel().getSelectedItem().setText(result.get());
+            } else renameSection();
+        }
+    }
+
+    public void updateTab() {
+        if (Sections.getSelectionModel().getSelectedItem() != lastTab) {
+            if (Sections.getSelectionModel().getSelectedItem().getText().equals("+")) if (aBoolean == true || NbSection < 1) addSection();
+        }
+        lastTab = Sections.getSelectionModel().getSelectedItem();
     }
 
     public void addSection() {
-        Sections.getTabs().removeAll(addSection);
-        switch (NbSection) {
-            case 1:
-                Sections.getTabs().addAll(Section2, addSection);
-                TextSection2.setText(TextAddSection.getText());
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Nouvelle section");
+        dialog.setHeaderText("Nom de la nouvelle section ?");
+        //dialog.setContentText("Nom de la nouvelle section :");
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            if (result.get().length() >= 1) {
+                Sections.getTabs().addAll(new Tab(result.get()));
+                Sections.getSelectionModel().selectNext();
+                aBoolean = true;
                 NbSection++;
-                break;
-            case 2:
-                Sections.getTabs().addAll(Section3, addSection);
-                TextSection3.setText(TextAddSection.getText());
-                NbSection++;
-                break;
-            case 3:
-                Sections.getTabs().addAll(Section4, addSection);
-                TextSection4.setText(TextAddSection.getText());
-                NbSection++;
-                break;
-            case 4:
-                Sections.getTabs().addAll(Section5, addSection);
-                TextSection5.setText(TextAddSection.getText());
-                NbSection++;
-                break;
-            default:
-                System.out.println("#erreur# addSection/NbSection!=1,2,3,4");
-                break;
+            } else addSection();
+        } else {
+            if (NbSection < 1) addSection();
+            else aBoolean = true;
         }
-        TextAddSection.setText(null);
     }
 
-    public void clearAddSection() { TextAddSection.setText(null); }
+    public void deleteSection() {
+        Sections.getTabs().remove(Sections.getSelectionModel().getSelectedItem());
+        Sections.getSelectionModel().selectNext();
+        NbSection--;
+        aBoolean = true;
+        if (Sections.getSelectionModel().getSelectedItem() == SectionAdd) {
+            addSection();
+        }
+    }
 
     public void cb4() {
         if (CB4.isSelected()) {
@@ -171,15 +170,44 @@ public class ProfesseurController {
     }
 
     public void importer() {
-
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Importer un exercice");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Fichier comptatible (.rct)", "*.rct"),
+                new FileChooser.ExtensionFilter("Tous les fichier", "*.*"));
+        Stage mainStage = ReconstitutionProfesseur.primaryStage;
+        File selectedFile = fileChooser.showOpenDialog(mainStage);
+        if (selectedFile != null) {
+            say("cc");
+        }
     }
 
     public void exporter() {
-
+        Stage stage = ReconstitutionProfesseur.primaryStage;
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Exporter");
+        File file = fileChooser.showSaveDialog(stage);
+        if (file != null) {
+            /*try {
+                ImageIO.write(SwingFXUtils.fromFXImage(pic.getImage(),
+                        null), "png", file);
+            } catch (IOException ex) {
+                System.out.println(ex.getMessage());
+            }*/
+        }
     }
 
     public void importerVideo() {
-
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Importer un média");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Medias comptatibles (.mp4, .mp3, .wav, .aac)", "*.mp4", "*.mp3", "*.wav", "*.aac"),
+                new FileChooser.ExtensionFilter("Tous les fichier", "*.*"));
+        Stage mainStage = ReconstitutionProfesseur.primaryStage;
+        File selectedFile = fileChooser.showOpenDialog(mainStage);
+        if (selectedFile != null) {
+            say("cc");
+        }
     }
 
     public void actuHandicapVisuel() {
@@ -193,12 +221,15 @@ public class ProfesseurController {
     }
 
     public void newProject() {
-        //Demande si l'user souhaite enregistrer son travail en cours
-        initialize();
+        dialogConfirmNewPrjct();
     }
 
     public void leave() {
-        //Quitter (avec demande d'enregistrement en cas de modif de l'exo)
+        dialogConfirmLeave();
+    }
+
+    public void say(String text) {
+        System.out.println(text);
     }
 
 }
