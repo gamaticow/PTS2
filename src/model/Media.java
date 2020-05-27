@@ -3,13 +3,16 @@ package model;
  *   Created by Corentin on 20/05/2020 at 00:56
  */
 
+import javafx.scene.control.Slider;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
+import javafx.util.Duration;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public abstract class Media implements Serializable {
+public class Media implements Serializable {
 
     private byte[] content;
     private final String extention;
@@ -17,7 +20,10 @@ public abstract class Media implements Serializable {
 
     protected String tempFile;
 
-    public Media(String path){
+    private javafx.scene.media.Media media;
+    private MediaPlayer mediaPlayer;
+
+    private Media(String path){
         extention = path.split("\\.")[path.split("\\.").length-1];
         try {
             content = Files.readAllBytes(Paths.get(path));
@@ -27,15 +33,25 @@ public abstract class Media implements Serializable {
     }
 
     public static Media load(String path) throws MediaNotCompatibleException {
-        if(path.endsWith(".mp4")){
-            return new Video(path);
+        if(path.endsWith(".mp4") || path.endsWith(".mp3")){
+            return new Media(path);
         }
         throw new MediaNotCompatibleException(path.split("\\.")[path.split("\\.").length-1]);
     }
 
-    public void initialize(){
+
+    public double getDuration(){
+        return duration;
+    }
+
+    /**
+     * Initialise la vidéo dans les fichier temporaire de l'utilisateur. Puis lie la video a la MediaView passé en paramètre
+     * @param mv MediaView où la vidéo doit être lu
+     */
+    public void initialize(MediaView mv, Slider progressSlider) {
         try {
             File file = File.createTempFile("Reconstitution", "." + extention);
+            file.deleteOnExit();
             OutputStream os = new FileOutputStream(file.getAbsolutePath());
             os.write(content);
             os.close();
@@ -44,20 +60,60 @@ public abstract class Media implements Serializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        media = new javafx.scene.media.Media(new File(tempFile).toURI().toString());
+        mediaPlayer = new MediaPlayer(media);
+        mv.setMediaPlayer(mediaPlayer);
+        mediaPlayer.setAutoPlay(false);
+        duration = mediaPlayer.getTotalDuration().toSeconds();
+        mv.fitWidthProperty();
+        mv.fitWidthProperty();
+
+        mediaPlayer.currentTimeProperty().addListener((observableValue, duration, current) ->{
+            if(!progressSlider.isPressed())
+                progressSlider.setValue((current.toSeconds() / mediaPlayer.getTotalDuration().toSeconds()) * 100);
+        });
     }
 
-    public double getDuration(){
-        return duration;
+    public boolean isPlaying() {
+        return mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING;
     }
 
-    public abstract void load(MediaView mv);
-    public abstract boolean isPlaying();
-    public abstract void play();
-    public abstract void pause();
-    public abstract double getVolume();
-    public abstract void setVolume(double value);
-    public abstract void avancer(double valeur);
-    public abstract void reculer(double valeur);
-    public abstract void recommencer();
+    public void play() {
+        mediaPlayer.play();
+    }
 
+    public void pause() {
+        mediaPlayer.pause();
+    }
+
+    public double getVolume(){
+        return mediaPlayer.getVolume();
+    }
+
+    public void setVolume(double volume) {
+        mediaPlayer.setVolume(volume);
+    }
+
+    public void avancer(double valeur) {
+        double temps = mediaPlayer.getCurrentTime().toSeconds() + valeur;
+        if (temps > duration)
+            temps = duration;
+        mediaPlayer.seek(Duration.seconds(temps));
+    }
+
+    public void reculer(double valeur) {
+        double temps = mediaPlayer.getCurrentTime().toSeconds() - valeur;
+        if (temps < 0)
+            temps = 0;
+        mediaPlayer.seek(Duration.seconds(temps));
+    }
+
+    public void recommencer() {
+        mediaPlayer.seek(Duration.ZERO);
+    }
+
+    public void goTo(double percentage) {
+        mediaPlayer.seek(Duration.seconds((percentage * mediaPlayer.getTotalDuration().toSeconds()) / 100));
+    }
 }
