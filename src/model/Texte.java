@@ -97,7 +97,7 @@ public class Texte implements Serializable {
         return texte;
     }
 
-    public String replaceChar(String str, char ch, int index) {
+    private String replaceChar(String str, char ch, int index) {
         return str.substring(0, index) + ch + str.substring(index+1);
     }
 }
