@@ -38,8 +38,6 @@ public class ApplicationController implements Initializable {
     @FXML private TextArea consigne;
     @FXML private Button validerProposition;
 
-    private boolean sliderDebug = true; //permet de debug le multiclique pour changer le temps de la vidéo
-
     //Exercice en cours par l'etudiant
     //Si null aucun exercice n'est chargé
     private Exercice exercice;
@@ -68,15 +66,15 @@ public class ApplicationController implements Initializable {
             fileError.setContentText("Une erreur interne c'est produite");
             fileError.show();
         }finally {
-            for (Partie partie : exercice.getParties()){
+            for (Partie partie : exercice.getParties())
                 parties.getTabs().add(new Tab(partie.getNom()));
-            }
             consigne.setText(exercice.getConsigne());
             changerPartie();
             if(!exercice.getSolution().isSolution_autorise())
                 solution.setVisible(false);
         }
     }
+
 
     public Partie getSelectedPartie(){
         if(exercice == null) return null;
@@ -106,8 +104,7 @@ public class ApplicationController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources){
         chargerExercice("test.caft");
-        exercice.getMedia().initialize();
-        exercice.getMedia().load(mv);
+        exercice.getMedia().initialize(mv, progressSlider);
     }
 
     public void pausePlay(){
@@ -143,7 +140,6 @@ public class ApplicationController implements Initializable {
     private double lastVolume = 10;
     public void mute(){
         if(exercice == null) return;
-        System.out.println(lastVolume);
 
         if (exercice.getMedia().getVolume() == 0){
             exercice.getMedia().setVolume(lastVolume/100);
@@ -161,18 +157,10 @@ public class ApplicationController implements Initializable {
         exercice.getMedia().setVolume(lastVolume/100);
     }
 
-    public void progressBarDebut() {
-        if(exercice == null) return;
-
-        sliderDebug = false;
-
-    }
 
     public void progressBarFin(){
-        /*if(exercice == null) return;
-
-        mp.seek(Duration.seconds((progressSlider.getValue() * mp.getTotalDuration().toSeconds()) / 100));
-        sliderDebug = true;*/
+        if(exercice == null) return;
+        exercice.getMedia().goTo(progressSlider.getValue());
     }
 
     public void aide(){
