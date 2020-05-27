@@ -23,13 +23,16 @@ public class Indice implements Serializable {
         return indice != null;
     }
 
+    public boolean indiceUtilise() {
+        return indice_utilise;
+    }
+
     /**
      * Utiliser l'indice
      * @return l'indice
      */
-    public String utiliserIndice(){
+    public void utiliserIndice(){
         indice_utilise = true;
-        return indice;
     }
 
     //==============================================================================================FONCTIONS PROFESSEUR
@@ -49,5 +52,4 @@ public class Indice implements Serializable {
     public String getIndice(){
         return indice == null ? "" : indice;
     }
-
 }

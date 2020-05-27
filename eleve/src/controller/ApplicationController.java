@@ -4,8 +4,8 @@ package controller;
  */
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.TextArea;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
 import javafx.scene.media.MediaView;
 import model.Exercice;
 import model.Partie;
@@ -14,13 +14,29 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-public class ApplicationController {
+import static javafx.scene.media.MediaPlayer.Status.PLAYING;
+
+public class ApplicationController implements Initializable {
 
     //TAG FXML
-    //TODO Modifier les types si besoin
-    @FXML private MediaView media;
+    @FXML private TabPane parties;
+    @FXML private MediaView mv;
     @FXML private TextArea texte;
+    @FXML private TextArea aideTexte;
+    @FXML private Button playPause;
+    @FXML private Button mute;
+    @FXML private Button avancer;
+    @FXML private Button reculer;
+    @FXML private Button recommencer;
+    @FXML private Button aide;
+    @FXML private Button solution;
+    @FXML private Slider volumeSlider;
+    @FXML private Slider progressSlider;
+    @FXML private TextArea consigne;
+    @FXML private Button validerProposition;
 
     //Exercice en cours par l'etudiant
     //Si null aucun exercice n'est chargé
@@ -43,24 +59,122 @@ public class ApplicationController {
                 fileError.setContentText("Le fichier ne peut pas être ouvert");
                 fileError.show();
             }
+            ois.close();
         } catch (IOException | ClassNotFoundException e) {
             Alert fileError = new Alert(Alert.AlertType.WARNING);
             fileError.setHeaderText("Une erreur c'est produite");
             fileError.setContentText("Une erreur interne c'est produite");
             fileError.show();
         }finally {
-            //TODO mettre la première partie de l'exercice
-            demarrerPartie(null);
+            for (Partie partie : exercice.getParties())
+                parties.getTabs().add(new Tab(partie.getNom()));
+            consigne.setText(exercice.getConsigne());
+            changerPartie();
+            if(!exercice.getSolution().isSolution_autorise())
+                solution.setVisible(false);
         }
     }
 
-    private void demarrerPartie(Partie partie){
-        //TODO afficher le texte de la partie
-        //TODO cacher le bouton aide s'il n'est pas disponible
-        //TODO cacher le bouton solution si elle n'est pas autorise
-        texte.setText(partie.texteAAficherEtudiant());
+
+    public Partie getSelectedPartie(){
+        if(exercice == null) return null;
+
+        return exercice.getPartie(parties.getSelectionModel().getSelectedItem().getText());
     }
 
-    //TODO faire tout le reste
+    public void changerPartie(){
+        if(exercice == null) return;
 
+        Partie partie = getSelectedPartie();
+        texte.setText(!exercice.isSolutionUtilise() ? partie.texteAAficherEtudiant() : partie.getTexte().getOriginal());
+
+        if(partie.getIndice().indiceUtilise()){
+            aideTexte.setText(partie.getIndice().getIndice());
+        }else {
+            aideTexte.setText("");
+        }
+
+        //cacher le bouton aide
+        if(partie.getIndice().indiceUtilisable() && !partie.getIndice().indiceUtilise() && !exercice.isSolutionUtilise())
+            aide.setVisible(true);
+        else
+            aide.setVisible(false);
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources){
+        chargerExercice("test.caft");
+        exercice.getMedia().initialize(mv, progressSlider);
+    }
+
+    public void pausePlay(){
+        if(exercice == null) return;
+
+        if (exercice.getMedia().isPlaying()){
+            exercice.getMedia().pause();
+        } else{
+            exercice.getMedia().play();
+        }
+
+    }
+
+    public void recommencer(){
+        if(exercice == null) return;
+
+        exercice.getMedia().recommencer();
+    }
+
+    public void reculer(){
+        if(exercice == null) return;
+
+        exercice.getMedia().reculer(5);
+    }
+
+    public void avancer(){
+        if(exercice == null) return;
+
+        exercice.getMedia().avancer(5);
+    }
+
+
+    private double lastVolume = 10;
+    public void mute(){
+        if(exercice == null) return;
+
+        if (exercice.getMedia().getVolume() == 0){
+            exercice.getMedia().setVolume(lastVolume/100);
+            volumeSlider.setValue(lastVolume);
+        }else{
+            exercice.getMedia().setVolume(0);
+            volumeSlider.setValue(0);
+        }
+    }
+
+    public void volumeSlider(){
+        if(exercice == null) return;
+
+        lastVolume = volumeSlider.getValue();
+        exercice.getMedia().setVolume(lastVolume/100);
+    }
+
+
+    public void progressBarFin(){
+        if(exercice == null) return;
+        exercice.getMedia().goTo(progressSlider.getValue());
+    }
+
+    public void aide(){
+        if(exercice == null) return;
+
+        getSelectedPartie().getIndice().utiliserIndice();
+        changerPartie();
+    }
+
+    public void solution(){
+        if(exercice == null) return;
+
+        exercice.getSolution().utiliseSolution();
+        changerPartie();
+        validerProposition.setVisible(false);
+    }
 }

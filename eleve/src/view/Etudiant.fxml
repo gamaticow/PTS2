@@ -8,7 +8,6 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Slider?>
-<?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
@@ -19,30 +18,9 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="794.0" prefWidth="1299.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="model.Video">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1300.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ApplicationController">
    <children>
-      <TabPane layoutX="41.0" layoutY="46.0" prefHeight="446.0" prefWidth="638.0" tabClosingPolicy="UNAVAILABLE">
-        <tabs>
-          <Tab text="Section 1">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="422.0" prefWidth="638.0">
-                     <children>
-                        <TextField editable="false" prefHeight="365.0" prefWidth="636.0" />
-                     </children>
-                  </AnchorPane>
-            </content>
-          </Tab>
-          <Tab text="Section 2">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="404.0" prefWidth="610.0">
-                     <children>
-                        <TextArea editable="false" prefHeight="357.0" prefWidth="613.0" promptText="Section 2" />
-                     </children>
-                  </AnchorPane>
-            </content>
-          </Tab>
-        </tabs>
-      </TabPane>
+      <TabPane fx:id="parties" layoutX="41.0" layoutY="46.0" onMouseClicked="#changerPartie" prefHeight="32.0" prefWidth="638.0" tabClosingPolicy="UNAVAILABLE" />
       <VBox alignment="CENTER_LEFT" layoutX="41.0" layoutY="481.0" prefHeight="200.0" prefWidth="614.0">
          <children>
             <Label prefHeight="26.0" prefWidth="288.0" text="Entrer un mot ou une suite de mots :">
@@ -58,7 +36,7 @@
                         <Insets />
                      </HBox.margin>
                   </Button>
-                  <Button fx:id="solution" mnemonicParsing="false" prefHeight="26.0" prefWidth="96.0" text="Solution">
+                  <Button fx:id="solution" mnemonicParsing="false" onMouseClicked="#solution" prefHeight="26.0" prefWidth="96.0" text="Solution">
                      <HBox.margin>
                         <Insets left="420.0" />
                      </HBox.margin>
@@ -83,7 +61,7 @@
                               <Insets left="5.0" top="200.0" />
                            </VBox.margin>
                         </Text>
-                        <Slider fx:id="volumeSlider" maxHeight="250.0" maxWidth="222.0" orientation="VERTICAL" prefHeight="142.0" prefWidth="44.0">
+                        <Slider fx:id="volumeSlider" maxHeight="250.0" maxWidth="222.0" onMouseReleased="#volumeSlider" orientation="VERTICAL" prefHeight="142.0" prefWidth="44.0" value="100.0">
                            <VBox.margin>
                               <Insets bottom="5.0" />
                            </VBox.margin>
@@ -92,7 +70,7 @@
                   </VBox>
                </children>
             </HBox>
-            <Slider fx:id="progressSlider" onDragDone="#progressBarDebut" onMouseClicked="#progressBarDebut" onMouseReleased="#progressBarFin" prefHeight="14.0" prefWidth="579.0">
+            <Slider fx:id="progressSlider" onMouseReleased="#progressBarFin" prefHeight="14.0" prefWidth="579.0">
                <VBox.margin>
                   <Insets left="10.0" />
                </VBox.margin>
@@ -117,8 +95,8 @@
       </VBox>
       <VBox alignment="CENTER_LEFT" layoutX="746.0" layoutY="501.0" prefHeight="261.0" prefWidth="480.0">
          <children>
-            <Button fx:id="aide" mnemonicParsing="false" prefHeight="26.0" prefWidth="68.0" text="Aide" />
-            <TextArea fx:id="Aide" editable="false" prefHeight="100.0" prefWidth="480.0">
+            <Button fx:id="aide" mnemonicParsing="false" onMouseClicked="#aide" prefHeight="26.0" prefWidth="68.0" text="Aide" />
+            <TextArea fx:id="aideTexte" editable="false" prefHeight="100.0" prefWidth="480.0">
                <VBox.margin>
                   <Insets bottom="20.0" />
                </VBox.margin>
@@ -128,7 +106,7 @@
                   <Font name="System Bold" size="16.0" />
                </font>
             </Label>
-            <TextArea fx:id="Consigne" editable="false" prefHeight="169.0" prefWidth="480.0" />
+            <TextArea fx:id="consigne" editable="false" prefHeight="169.0" prefWidth="480.0" />
          </children>
       </VBox>
       <MenuBar prefHeight="26.0" prefWidth="1299.0">
@@ -148,5 +126,6 @@
           </Menu>
         </menus>
       </MenuBar>
+      <TextArea fx:id="texte" editable="false" layoutX="41.0" layoutY="80.0" prefHeight="432.0" prefWidth="638.0" />
    </children>
 </AnchorPane>

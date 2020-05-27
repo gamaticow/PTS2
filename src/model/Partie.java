@@ -28,6 +28,10 @@ public class Partie implements Serializable {
         indice = new Indice();
     }
 
+    public String getNom(){
+        return nom;
+    }
+
     //================================================================================================FONCTIONS ETUDIANT
     /**
      * Cherche un mot dans le texte
@@ -56,4 +60,12 @@ public class Partie implements Serializable {
     }
 
     //==============================================================================================FONCTIONS PROFESSEUR
+
+    public Indice getIndice() {
+        return indice;
+    }
+
+    public Texte getTexte(){
+        return texte;
+    }
 }

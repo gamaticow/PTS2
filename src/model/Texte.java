@@ -20,8 +20,13 @@ public class Texte implements Serializable {
     public String getTexteCache(){
         if(texte_decouvert == null){
             StringBuilder sb = new StringBuilder();
-            for(int i = 0; i < texte.length(); i++)
-                sb.append(CARACTERE_DE_SUBSTITUTION);
+            for(int i = 0; i < texte.length(); i++){
+                if(String.valueOf(texte.charAt(i)).matches("[A-Za-z0-9]")){
+                    sb.append(CARACTERE_DE_SUBSTITUTION);
+                }else {
+                    sb.append(texte.charAt(i));
+                }
+            }
             texte_decouvert = sb.toString();
         }
         return texte_decouvert;
@@ -78,6 +83,10 @@ public class Texte implements Serializable {
         }
         return true;
     }
+  
+    private String replaceChar(String str, char ch, int index) {
+        return str.substring(0, index) + ch + str.substring(index+1);
+    }
 
 
     //==============================================================================================FONCTIONS PROFESSEUR
@@ -97,7 +106,4 @@ public class Texte implements Serializable {
         return texte;
     }
 
-    private String replaceChar(String str, char ch, int index) {
-        return str.substring(0, index) + ch + str.substring(index+1);
-    }
 }
