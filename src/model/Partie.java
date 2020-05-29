@@ -41,9 +41,9 @@ public class Partie implements Serializable {
      */
     public boolean chercherMot(String mot, boolean bouton){
         if(!bouton)
-            return texte.chercherMot(mot, 0);
+            return texte.chercherMot(mot, 0, true);
         else
-            if(texte.chercherMot(mot, 0))
+            if(texte.chercherMot(mot, 0, true))
                 return true;
             else {
                 nb_fautes++;

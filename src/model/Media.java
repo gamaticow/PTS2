@@ -56,7 +56,6 @@ public class Media implements Serializable {
             os.write(content);
             os.close();
             tempFile = file.getAbsolutePath();
-            System.out.println(file.getAbsolutePath());
         } catch (IOException e) {
             e.printStackTrace();
         }

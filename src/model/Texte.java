@@ -58,30 +58,25 @@ public class Texte implements Serializable {
                     continue;
                 }
                 trouver=true;
-                break;
-            }
-            if (texte_decouvert.charAt(i)==mot.charAt(caractere_trouver)){
-                if (caractere_trouver==0){
-                    debut=i;
+            }else {
+                if (texte_decouvert.charAt(i) == mot.charAt(caractere_trouver)) {
+                    if (caractere_trouver == 0) {
+                        debut = i;
+                    }
+                    caractere_trouver++;
+                } else {
+                    caractere_trouver = 0;
                 }
-                caractere_trouver++;
-            }
-            else{
-                caractere_trouver=0;
             }
         }
 
-        if (trouver==true){
+        if (trouver){
             for (int i=debut;i<(debut+caractere_trouver);i++){
                 replaceChar(texte,texte_decouvert.charAt(i),i);
             }
-            System.out.println(texte_decouvert+" "+texte+" "+mot+" "+ (debut+caractere_trouver));
-
+            return true;
         }
-        else{
-            System.out.println(texte);
-        }
-        return true;
+        return false;
     }
   
     private String replaceChar(String str, char ch, int index) {

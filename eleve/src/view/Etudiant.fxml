@@ -28,10 +28,10 @@
                   <Font name="System Bold" size="16.0" />
                </font>
             </Label>
-            <TextField prefHeight="32.0" prefWidth="614.0" />
+            <TextField fx:id="entrerTexte" prefHeight="32.0" prefWidth="614.0" />
             <HBox prefHeight="63.0" prefWidth="614.0">
                <children>
-                  <Button fx:id="validerProposition" mnemonicParsing="false" prefHeight="42.0" prefWidth="111.0" text="Valider">
+                  <Button fx:id="validerProposition" mnemonicParsing="false" onMouseClicked="#valider" prefHeight="42.0" prefWidth="111.0" text="Valider">
                      <HBox.margin>
                         <Insets />
                      </HBox.margin>
@@ -114,8 +114,8 @@
           <Menu mnemonicParsing="false" text="Version étudiant" />
           <Menu mnemonicParsing="false" text="Exercice">
             <items>
-                  <MenuItem mnemonicParsing="false" text="Importer" />
-                  <MenuItem mnemonicParsing="false" text="Quitter" />
+                  <MenuItem mnemonicParsing="false" onAction="#importer" text="Importer" />
+                  <MenuItem mnemonicParsing="false" onAction="#quitter" text="Quitter" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Paramètres">

@@ -22,7 +22,7 @@ import java.io.ObjectOutputStream;
 public class ReconstitutionProfesseur {
 
     public static void main(String[] args) throws MediaNotCompatibleException, IOException {
-        String path = "C:\\Users\\coren\\OneDrive\\Bureau\\test.mp3";
+        String path = "C:\\Users\\coren\\OneDrive\\Bureau\\test.mp4";
         Exercice exercice = new Exercice();
         exercice.setConsigne("Traduire la vidéo");
         exercice.createPartie("Test 1");

@@ -13,7 +13,7 @@ public class ReconstitutionEleve extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("../view/Etudiant.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/view/Etudiant.fxml"));
         primaryStage.setTitle("Reconstitution version étudiant");
         primaryStage.setScene(new Scene(root));
         primaryStage.setResizable(false);
