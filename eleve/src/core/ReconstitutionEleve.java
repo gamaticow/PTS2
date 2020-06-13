@@ -15,7 +15,7 @@ public class ReconstitutionEleve extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/view/Etudiant.fxml"));
-        primaryStage.setTitle("Reconstitution version étudiant");
+        primaryStage.setTitle("Reconstitution (Logiciel de d'exercice linguistique)");
         primaryStage.getIcons().add(new Image("https://www.zupimages.net/up/20/22/2k9q.png"));
         primaryStage.setScene(new Scene(root));
         primaryStage.setResizable(false);

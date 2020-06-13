@@ -6,6 +6,8 @@ package controller;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.media.MediaView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -19,8 +21,6 @@ import java.io.ObjectInputStream;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
-
-import static javafx.scene.media.MediaPlayer.Status.PLAYING;
 
 public class ApplicationController implements Initializable {
 
@@ -98,7 +98,7 @@ public class ApplicationController implements Initializable {
         if(partie.getIndice().indiceUtilise()){
             aideTexte.setText(partie.getIndice().getIndice());
         }else {
-            aideTexte.setText("");
+            aideTexte.clear();
         }
 
         //cacher le bouton aide
@@ -106,6 +106,8 @@ public class ApplicationController implements Initializable {
             aide.setVisible(true);
         else
             aide.setVisible(false);
+
+        entrerTexte.clear();
     }
 
     public void rafraichirTexte(){
@@ -118,6 +120,12 @@ public class ApplicationController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources){
         //chargerExercice("test.caft");
+        entrerTexte.textProperty().addListener((observable, oldValue, newValue) -> {
+            if(exercice == null)
+                return;
+            if (getSelectedPartie().correspondance(newValue)) rafraichirTexte();
+            rafraichirTexte();
+        });
     }
 
     public void pausePlay(){
@@ -193,9 +201,9 @@ public class ApplicationController implements Initializable {
 
     public void valider(){
         if(exercice == null) return;
-        System.out.println(entrerTexte.getText());
-        if(getSelectedPartie().chercherMot(entrerTexte.getText(), true)) rafraichirTexte();
+        if(getSelectedPartie().chercherMot(entrerTexte.getText())) rafraichirTexte();
         rafraichirTexte();
+        entrerTexte.clear();
     }
 
     public void importer(){
@@ -227,5 +235,14 @@ public class ApplicationController implements Initializable {
             }
         }
         return false;
+    }
+
+    public void entrerTexte(KeyEvent event) {
+        if(exercice == null)
+            return;
+        if(event.getCode() == KeyCode.ENTER) {
+            valider();
+            event.consume();
+        }
     }
 }

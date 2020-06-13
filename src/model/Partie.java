@@ -4,6 +4,7 @@ package model;
  */
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 public class Partie implements Serializable {
 
@@ -36,19 +37,34 @@ public class Partie implements Serializable {
     /**
      * Cherche un mot dans le texte
      * @param mot Mot a chercher
-     * @param bouton Si l'etudiant a cliquer sur le bouton valider pour lancer la recherche ou si la recherche est faite car elle a été activé en temps réel
      * @return Si le texte a été modifier pour le rafraichir si oui
      */
-    public boolean chercherMot(String mot, boolean bouton){
-        if(!bouton)
-            return texte.chercherMot(mot, 0, true);
-        else
-            if(texte.chercherMot(mot, 0, true))
-                return true;
-            else {
-                nb_fautes++;
-                return false;
-            }
+    public boolean chercherMot(String mot){
+        if(mot == null || mot.equals(""))
+            return false;
+
+        while (mot.startsWith(" "))
+            mot = mot.substring(1);
+        while (mot.endsWith(" "))
+            mot = mot.substring(0, mot.length()-1);
+        if(mot.equals(""))
+            return false;
+        return texte.chercherMot(mot, 0, true);
+    }
+
+    public boolean correspondance(String mot){
+        if(mot == null || mot.equals("")) {
+            texte.supprimerCorrespondance();
+            return true;
+        }
+
+        while (mot.startsWith(" "))
+            mot = mot.substring(1);
+        while (mot.endsWith(" "))
+            mot = mot.substring(0, mot.length()-1);
+        if(mot.equals(""))
+            return false;
+        return texte.correspondance(mot, 0, true);
     }
 
     /**
