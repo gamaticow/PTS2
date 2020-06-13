@@ -1,21 +1,21 @@
 package controller;
 
-import core.ReconstitutionProfesseur;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.media.MediaView;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import model.Exercice;
+import model.Media;
+import model.MediaNotCompatibleException;
 
-import javax.imageio.ImageIO;
-import javax.swing.text.StyledEditorKit;
 import java.io.File;
-import java.io.IOException;
+import java.net.URL;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
 
-public class ProfesseurController {
+public class ProfesseurController implements Initializable {
 
     @FXML
     public Button importBtn;
@@ -28,19 +28,23 @@ public class ProfesseurController {
     public CheckBox CB5;   //Correspondance en temps réel
     public CheckBox CB6;   //Sensibilité aux accents
     public TabPane Sections;   //TabPane contenant toutes les sections
-    public Tab Section1;   //Section 1
-    public Tab Section11;   //Section 1
     public Tab SectionAdd;
     public MenuItem HandicapVisuel;
     public MenuItem HandicapAuditif;
+    public MediaView mv;
 
     private int NbSection = 2; //Nombre de section
     private Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
     private Tab lastTab;
     private Boolean aBoolean = false;
 
-    public void initialize() {
+    private Exercice exercice;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
         aBoolean = false;
+        exercice = new Exercice();
+
         Consigne.setText(null);
         Aide.setText(null);
         Aide.setEditable(true);
@@ -52,11 +56,18 @@ public class ProfesseurController {
         CB5.setSelected(false);
         CB6.setSelected(false);
         Sections.getTabs().removeAll(Sections.getTabs());
-        Sections.getTabs().removeAll(Sections.getTabs());
-        Sections.getTabs().addAll(SectionAdd, Section1, Section11);
-        lastTab = Section1;
+
+        Tab section1 = new Tab("Partie 1");
+        Tab section2 = new Tab("Partie 2");
+
+        Sections.getTabs().addAll(SectionAdd, section1, section2);
+
+        exercice.createPartie(section1.getText());
+        exercice.createPartie(section2.getText());
+
+        lastTab = section1;
         NbSection=1;
-        Sections.getSelectionModel().select(Section1);
+        Sections.getSelectionModel().select(section1);
         aBoolean = true;
     }
 
@@ -70,9 +81,9 @@ public class ProfesseurController {
         alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeCancel);
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == buttonTypeOne){
-            importer();
+            exporter();
         } else if (result.get() == buttonTypeTwo) {
-            initialize();
+            initialize(null, null);
         }
     }
 
@@ -87,9 +98,9 @@ public class ProfesseurController {
         alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeCancel);
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == buttonTypeOne){
-            importer();
+            exporter();
         } else if (result.get() == buttonTypeTwo) {
-            ReconstitutionProfesseur.leave();
+            System.exit(0);
         }
     }
 
@@ -136,9 +147,10 @@ public class ProfesseurController {
         //dialog.setContentText("Nom de la nouvelle section :");
         Optional<String> result = dialog.showAndWait();
         if (result.isPresent()) {
-            if (result.get().length() >= 1) {
+            if (result.get().length() >= 1 && !exercice.sectionExiste(result.get())) {
                 Sections.getTabs().addAll(new Tab(result.get()));
                 Sections.getSelectionModel().selectNext();
+                exercice.createPartie(result.get());
                 aBoolean = true;
                 NbSection++;
             } else addSection();
@@ -175,18 +187,16 @@ public class ProfesseurController {
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Fichier comptatible (.rct)", "*.rct"),
                 new FileChooser.ExtensionFilter("Tous les fichier", "*.*"));
-        Stage mainStage = ReconstitutionProfesseur.primaryStage;
-        File selectedFile = fileChooser.showOpenDialog(mainStage);
+        File selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
             say("cc");
         }
     }
 
     public void exporter() {
-        Stage stage = ReconstitutionProfesseur.primaryStage;
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Exporter");
-        File file = fileChooser.showSaveDialog(stage);
+        File file = fileChooser.showSaveDialog(null);
         if (file != null) {
             /*try {
                 ImageIO.write(SwingFXUtils.fromFXImage(pic.getImage(),
@@ -197,16 +207,17 @@ public class ProfesseurController {
         }
     }
 
-    public void importerVideo() {
+    public void importerVideo() throws MediaNotCompatibleException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Importer un média");
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Medias comptatibles (.mp4, .mp3, .wav, .aac)", "*.mp4", "*.mp3", "*.wav", "*.aac"),
-                new FileChooser.ExtensionFilter("Tous les fichier", "*.*"));
-        Stage mainStage = ReconstitutionProfesseur.primaryStage;
-        File selectedFile = fileChooser.showOpenDialog(mainStage);
+                new FileChooser.ExtensionFilter("Medias comptatibles (.mp4, .mp3)", "*.mp4", "*.mp3"));
+        File selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
-            say("cc");
+            exercice.setMedia(Media.load(selectedFile.getAbsolutePath()));
+            exercice.getMedia().initialize();
+            exercice.getMedia().load(mv);
+            importBtn.setVisible(false);
         }
     }
 
@@ -231,5 +242,4 @@ public class ProfesseurController {
     public void say(String text) {
         System.out.println(text);
     }
-
 }

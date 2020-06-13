@@ -53,7 +53,17 @@ public class Exercice implements Serializable {
 
     //==============================================================================================FONCTIONS PROFESSEUR
 
+    public boolean sectionExiste(String nom){
+        for(Partie partie : parties){
+            if(partie.getNom().equalsIgnoreCase(nom))
+                return true;
+        }
+        return false;
+    }
+
     public void createPartie(String nom) {
+        if(sectionExiste(nom))
+            return;
         parties.add(new Partie(nom));
     }
 

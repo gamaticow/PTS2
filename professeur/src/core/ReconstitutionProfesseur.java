@@ -14,14 +14,11 @@ import javafx.stage.Stage;
 
 public class ReconstitutionProfesseur extends Application {
 
-    public static Stage primaryStage;
-
     public void start(Stage primaryStage) throws Exception {
-        this.primaryStage = primaryStage;
         FXMLLoader loader = new FXMLLoader(getClass().getResource("../view/Professeur.fxml"));
         Parent root = loader.load();
         primaryStage.getIcons().add(new Image("https://www.zupimages.net/up/20/22/2k9q.png"));
-        primaryStage.setTitle("Reconstitution");
+        primaryStage.setTitle("Reconstitution (Logiciel d'exercice linguistique)");
         primaryStage.setResizable(false);
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
@@ -30,9 +27,5 @@ public class ReconstitutionProfesseur extends Application {
         primaryStage.setScene(new Scene(root));
         primaryStage.setResizable(false);
         primaryStage.show();*/
-    }
-
-    public static void leave() {
-        primaryStage.close();
     }
 }
