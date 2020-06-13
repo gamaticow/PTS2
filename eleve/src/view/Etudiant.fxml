@@ -13,6 +13,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.media.MediaView?>
 <?import javafx.scene.text.Font?>
@@ -28,17 +29,12 @@
                   <Font name="System Bold" size="16.0" />
                </font>
             </Label>
-            <TextField prefHeight="32.0" prefWidth="614.0" />
-            <HBox prefHeight="63.0" prefWidth="614.0">
+            <HBox prefHeight="87.0" prefWidth="614.0">
                <children>
-                  <Button fx:id="validerProposition" mnemonicParsing="false" prefHeight="42.0" prefWidth="111.0" text="Valider">
+                  <TextField fx:id="entrerTexte" onKeyPressed="#entrerTexte" prefHeight="32.0" prefWidth="536.0" />
+                  <Button fx:id="validerProposition" mnemonicParsing="false" onMouseClicked="#valider" prefHeight="32.0" prefWidth="79.0" text="Valider">
                      <HBox.margin>
                         <Insets />
-                     </HBox.margin>
-                  </Button>
-                  <Button fx:id="solution" mnemonicParsing="false" onMouseClicked="#solution" prefHeight="26.0" prefWidth="96.0" text="Solution">
-                     <HBox.margin>
-                        <Insets left="420.0" />
                      </HBox.margin>
                   </Button>
                </children>
@@ -70,7 +66,7 @@
                   </VBox>
                </children>
             </HBox>
-            <Slider fx:id="progressSlider" onMousePressed="#progressBarDebut" onMouseReleased="#progressBarFin" prefHeight="14.0" prefWidth="579.0">
+            <Slider fx:id="progressSlider" onMouseReleased="#progressBarFin" prefHeight="14.0" prefWidth="579.0">
                <VBox.margin>
                   <Insets left="10.0" />
                </VBox.margin>
@@ -95,7 +91,13 @@
       </VBox>
       <VBox alignment="CENTER_LEFT" layoutX="746.0" layoutY="501.0" prefHeight="261.0" prefWidth="480.0">
          <children>
-            <Button fx:id="aide" mnemonicParsing="false" onMouseClicked="#aide" prefHeight="26.0" prefWidth="68.0" text="Aide" />
+            <HBox prefHeight="32.0" prefWidth="480.0">
+               <children>
+                  <Button fx:id="aide" mnemonicParsing="false" onMouseClicked="#aide" prefHeight="26.0" prefWidth="68.0" text="Aide" />
+                  <Pane prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                  <Button fx:id="solution" mnemonicParsing="false" onMouseClicked="#solution" prefHeight="26.0" prefWidth="96.0" text="Solution" />
+               </children>
+            </HBox>
             <TextArea fx:id="aideTexte" editable="false" prefHeight="100.0" prefWidth="480.0">
                <VBox.margin>
                   <Insets bottom="20.0" />
@@ -114,8 +116,8 @@
           <Menu mnemonicParsing="false" text="Version étudiant" />
           <Menu mnemonicParsing="false" text="Exercice">
             <items>
-                  <MenuItem mnemonicParsing="false" text="Importer" />
-                  <MenuItem mnemonicParsing="false" text="Quitter" />
+                  <MenuItem mnemonicParsing="false" onAction="#importer" text="Importer" />
+                  <MenuItem mnemonicParsing="false" onAction="#quitter" text="Quitter" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Paramètres">
@@ -126,6 +128,6 @@
           </Menu>
         </menus>
       </MenuBar>
-      <TextArea fx:id="texte" editable="false" layoutX="41.0" layoutY="80.0" prefHeight="432.0" prefWidth="638.0" />
+      <TextArea fx:id="texte" editable="false" layoutX="41.0" layoutY="80.0" prefHeight="432.0" prefWidth="638.0" wrapText="true" />
    </children>
 </AnchorPane>

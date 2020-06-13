@@ -6,7 +6,11 @@ package controller;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.media.MediaView;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import model.Exercice;
 import model.Partie;
 
@@ -15,9 +19,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
-
-import static javafx.scene.media.MediaPlayer.Status.PLAYING;
 
 public class ApplicationController implements Initializable {
 
@@ -37,8 +40,7 @@ public class ApplicationController implements Initializable {
     @FXML private Slider progressSlider;
     @FXML private TextArea consigne;
     @FXML private Button validerProposition;
-
-    private boolean sliderDebug = true; //permet de debug le multiclique pour changer le temps de la vidéo
+    @FXML private TextField entrerTexte;
 
     //Exercice en cours par l'etudiant
     //Si null aucun exercice n'est chargé
@@ -60,23 +62,26 @@ public class ApplicationController implements Initializable {
                 fileError.setHeaderText("Fichier non compatible");
                 fileError.setContentText("Le fichier ne peut pas être ouvert");
                 fileError.show();
+                return;
             }
             ois.close();
         } catch (IOException | ClassNotFoundException e) {
             Alert fileError = new Alert(Alert.AlertType.WARNING);
-            fileError.setHeaderText("Une erreur c'est produite");
-            fileError.setContentText("Une erreur interne c'est produite");
+            fileError.setHeaderText("Fichier non compatible");
+            fileError.setContentText("Le fichier ne peut pas être ouvert");
             fileError.show();
-        }finally {
-            for (Partie partie : exercice.getParties()){
-                parties.getTabs().add(new Tab(partie.getNom()));
-            }
-            consigne.setText(exercice.getConsigne());
-            changerPartie();
-            if(!exercice.getSolution().isSolution_autorise())
-                solution.setVisible(false);
+            return;
         }
+        parties.getTabs().clear();
+        for (Partie partie : exercice.getParties())
+            parties.getTabs().add(new Tab(partie.getNom()));
+        consigne.setText(exercice.getConsigne());
+        changerPartie();
+        if(!exercice.getSolution().isSolution_autorise())
+            solution.setVisible(false);
+        exercice.getMedia().initialize(mv, progressSlider);
     }
+
 
     public Partie getSelectedPartie(){
         if(exercice == null) return null;
@@ -93,7 +98,7 @@ public class ApplicationController implements Initializable {
         if(partie.getIndice().indiceUtilise()){
             aideTexte.setText(partie.getIndice().getIndice());
         }else {
-            aideTexte.setText("");
+            aideTexte.clear();
         }
 
         //cacher le bouton aide
@@ -101,13 +106,26 @@ public class ApplicationController implements Initializable {
             aide.setVisible(true);
         else
             aide.setVisible(false);
+
+        entrerTexte.clear();
+    }
+
+    public void rafraichirTexte(){
+        if(exercice == null) return;
+
+        Partie partie = getSelectedPartie();
+        texte.setText(!exercice.isSolutionUtilise() ? partie.texteAAficherEtudiant() : partie.getTexte().getOriginal());
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources){
-        chargerExercice("test.caft");
-        exercice.getMedia().initialize();
-        exercice.getMedia().load(mv);
+        //chargerExercice("test.caft");
+        entrerTexte.textProperty().addListener((observable, oldValue, newValue) -> {
+            if(exercice == null)
+                return;
+            if (getSelectedPartie().correspondance(newValue)) rafraichirTexte();
+            rafraichirTexte();
+        });
     }
 
     public void pausePlay(){
@@ -143,7 +161,6 @@ public class ApplicationController implements Initializable {
     private double lastVolume = 10;
     public void mute(){
         if(exercice == null) return;
-        System.out.println(lastVolume);
 
         if (exercice.getMedia().getVolume() == 0){
             exercice.getMedia().setVolume(lastVolume/100);
@@ -161,18 +178,10 @@ public class ApplicationController implements Initializable {
         exercice.getMedia().setVolume(lastVolume/100);
     }
 
-    public void progressBarDebut() {
-        if(exercice == null) return;
-
-        sliderDebug = false;
-
-    }
 
     public void progressBarFin(){
-        /*if(exercice == null) return;
-
-        mp.seek(Duration.seconds((progressSlider.getValue() * mp.getTotalDuration().toSeconds()) / 100));
-        sliderDebug = true;*/
+        if(exercice == null) return;
+        exercice.getMedia().goTo(progressSlider.getValue());
     }
 
     public void aide(){
@@ -188,5 +197,52 @@ public class ApplicationController implements Initializable {
         exercice.getSolution().utiliseSolution();
         changerPartie();
         validerProposition.setVisible(false);
+    }
+
+    public void valider(){
+        if(exercice == null) return;
+        if(getSelectedPartie().chercherMot(entrerTexte.getText())) rafraichirTexte();
+        rafraichirTexte();
+        entrerTexte.clear();
+    }
+
+    public void importer(){
+        Stage primaryStage = (Stage) texte.getScene().getWindow();
+        primaryStage.setOnCloseRequest(event -> {
+            if(!quitter())
+                event.consume();
+        });
+        FileChooser importFileChooser = new FileChooser();
+        importFileChooser.setTitle("Ouvrir un exercice");
+        importFileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichier exercice reconstitution", "*.caft"));
+        File file = importFileChooser.showOpenDialog(null);
+        if(file != null)
+            chargerExercice(file.getAbsolutePath());
+    }
+
+    public boolean quitter(){
+        if(exercice == null){
+            System.exit(0);
+        }else{
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Confirmation");
+            alert.setContentText("Etes-vous sûr de vouloir quitter ?");
+            Optional<ButtonType> result = alert.showAndWait();
+
+            if(result.get() == ButtonType.OK) {
+                System.exit(0);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void entrerTexte(KeyEvent event) {
+        if(exercice == null)
+            return;
+        if(event.getCode() == KeyCode.ENTER) {
+            valider();
+            event.consume();
+        }
     }
 }
