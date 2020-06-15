@@ -3,22 +3,29 @@ package controller;
  *   Created by Corentin on 20/05/2020 at 00:52
  */
 
+import core.ReconstitutionEleve;
+import javafx.application.HostServices;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.VBox;
 import javafx.scene.media.MediaView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import model.Exercice;
 import model.Partie;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.awt.*;
+import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -29,11 +36,6 @@ public class ApplicationController implements Initializable {
     @FXML private MediaView mv;
     @FXML private TextArea texte;
     @FXML private TextArea aideTexte;
-    @FXML private Button playPause;
-    @FXML private Button mute;
-    @FXML private Button avancer;
-    @FXML private Button reculer;
-    @FXML private Button recommencer;
     @FXML private Button aide;
     @FXML private Button solution;
     @FXML private Slider volumeSlider;
@@ -41,6 +43,7 @@ public class ApplicationController implements Initializable {
     @FXML private TextArea consigne;
     @FXML private Button validerProposition;
     @FXML private TextField entrerTexte;
+    @FXML private VBox player;
 
     //Exercice en cours par l'etudiant
     //Si null aucun exercice n'est chargé
@@ -79,7 +82,15 @@ public class ApplicationController implements Initializable {
         changerPartie();
         if(!exercice.getSolution().isSolution_autorise())
             solution.setVisible(false);
-        exercice.getMedia().initialize(mv, progressSlider);
+
+        if(exercice.getMedia() == null)
+            player.setVisible(false);
+        else {
+            player.setVisible(true);
+            exercice.getMedia().initialize(mv, progressSlider);
+        }
+
+        validerProposition.setVisible(true);
     }
 
 
@@ -123,7 +134,9 @@ public class ApplicationController implements Initializable {
         entrerTexte.textProperty().addListener((observable, oldValue, newValue) -> {
             if(exercice == null)
                 return;
-            if (getSelectedPartie().correspondance(newValue)) rafraichirTexte();
+            if(!exercice.isCorrespondance())
+                return;
+            if (getSelectedPartie().correspondance(newValue, exercice.isSensCasse(), exercice.isSensAccent())) rafraichirTexte();
             rafraichirTexte();
         });
     }
@@ -201,7 +214,7 @@ public class ApplicationController implements Initializable {
 
     public void valider(){
         if(exercice == null) return;
-        if(getSelectedPartie().chercherMot(entrerTexte.getText())) rafraichirTexte();
+        if(getSelectedPartie().chercherMot(entrerTexte.getText(), false, exercice.isSensCasse(), exercice.isSensAccent())) rafraichirTexte();
         rafraichirTexte();
         entrerTexte.clear();
     }
@@ -243,6 +256,30 @@ public class ApplicationController implements Initializable {
         if(event.getCode() == KeyCode.ENTER) {
             valider();
             event.consume();
+        }
+    }
+
+    public void help(){
+        if(Desktop.isDesktopSupported()){
+            try{
+
+                ClassLoader classLoader = getClass().getClassLoader();
+
+                URL resource = classLoader.getResource("manuel_etudiant.pdf");
+                if (resource == null) {
+                    throw new IllegalArgumentException("file is not found!");
+                } else {
+                    Path dungeon_pdf = Files.createTempFile("Reconstitution", ".pdf");
+                    try (InputStream is = getClass().getClassLoader().getResourceAsStream("manuel_etudiant.pdf")) {
+                        Files.copy(is, dungeon_pdf, StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    File dungeon = dungeon_pdf.toFile();
+                    Desktop.getDesktop().open(dungeon_pdf.toFile());
+                    dungeon.deleteOnExit();
+                }
+            } catch (IOException e){
+                e.printStackTrace();
+            }
         }
     }
 }

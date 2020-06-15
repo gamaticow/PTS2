@@ -3,14 +3,24 @@ package controller;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.VBox;
 import javafx.scene.media.MediaView;
 import javafx.stage.FileChooser;
 import model.Exercice;
 import model.Media;
 import model.MediaNotCompatibleException;
+import model.Partie;
 
-import java.io.File;
+import java.awt.*;
+import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -19,84 +29,113 @@ public class ProfesseurController implements Initializable {
 
     @FXML
     public Button importBtn;
-    public TextArea Consigne;
-    public TextArea Aide;
-    public CheckBox CB1;   //Sensibilité aux majuscules
-    public CheckBox CB2;   //Bouton solution
-    public CheckBox CB3;   //Remplacement partiel d'un mot
-    public CheckBox CB4;   //Bouton d'aide
-    public CheckBox CB5;   //Correspondance en temps réel
-    public CheckBox CB6;   //Sensibilité aux accents
+    public CheckBox sensCasse;   //Sensibilité aux majuscules
+    public CheckBox cb_solution;   //Bouton solution
+    public CheckBox cb_motComplet;   //Remplacement partiel d'un mot
+    public CheckBox cb_correspondance;   //Correspondance en temps réel
+    public CheckBox sensAccent;   //Sensibilité aux accents
     public TabPane Sections;   //TabPane contenant toutes les sections
-    public Tab SectionAdd;
-    public MenuItem HandicapVisuel;
-    public MenuItem HandicapAuditif;
     public MediaView mv;
-
-    private int NbSection = 2; //Nombre de section
-    private Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-    private Tab lastTab;
-    private Boolean aBoolean = false;
+    public Slider progressSlider;
+    public Slider volumeSlider;
+    public TextArea texte;
+    public TextArea aide;
+    public TextArea consigne;
+    public VBox player;
 
     private Exercice exercice;
 
+    private boolean ignoreAdd = false;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        aBoolean = false;
+        newExercise();
+        ignoreAdd = false;
+        Sections.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if(newValue == null)
+                return;
+            if(newValue.getText().equals("+")){
+                if(ignoreAdd){
+                    ignoreAdd = false;
+                    return;
+                }
+                if(Sections.getTabs().contains(oldValue))
+                    Sections.getSelectionModel().select(oldValue);
+                else
+                    Sections.getSelectionModel().select(0);
+                formNewTab();
+            }else {
+                changeTab();
+            }
+        });
+        Sections.setTabClosingPolicy(TabPane.TabClosingPolicy.SELECTED_TAB);
+        texte.textProperty().addListener((observable, oldValue, newValue) -> textFieldEdited(newValue));
+        aide.textProperty().addListener((observable, oldValue, newValue) -> aideTextFieldEdited(newValue));
+        consigne.textProperty().addListener((observable, oldValue, newValue) -> consigneTextFieldEdited(newValue));
+        cb_solution.selectedProperty().addListener((observable, oldValue, newValue) -> exercice.getSolution().setSolution_autorise(newValue));
+        cb_motComplet.selectedProperty().addListener((observable, oldValue, newValue) -> exercice.setMot_complet(newValue));
+        cb_correspondance.selectedProperty().addListener((observable, oldValue, newValue) -> exercice.setCorrespondance(newValue));
+        sensCasse.selectedProperty().addListener((observable, oldValue, newValue) -> exercice.setSensCasse(newValue));
+        sensAccent.selectedProperty().addListener((observable, oldValue, newValue) -> exercice.setSensAccent(newValue));
+    }
+
+    public void newExercise(){
         exercice = new Exercice();
+        ignoreAdd = true;
 
-        Consigne.setText(null);
-        Aide.setText(null);
-        Aide.setEditable(true);
-        Aide.setPromptText(null);
-        CB1.setSelected(false);
-        CB2.setSelected(false);
-        CB3.setSelected(false);
-        CB4.setSelected(true);
-        CB5.setSelected(false);
-        CB6.setSelected(false);
-        Sections.getTabs().removeAll(Sections.getTabs());
+        texte.clear();
+        consigne.clear();
+        aide.clear();
+        cb_solution.setSelected(exercice.getSolution().isSolution_autorise());
+        cb_motComplet.setSelected(exercice.isMot_complet());
+        cb_correspondance.setSelected(exercice.isCorrespondance());
+        sensCasse.setSelected(exercice.isSensCasse());
+        sensAccent.setSelected(exercice.isSensAccent());
 
-        Tab section1 = new Tab("Partie 1");
-        Tab section2 = new Tab("Partie 2");
+        player.setVisible(false);
+        importBtn.setVisible(true);
 
-        Sections.getTabs().addAll(SectionAdd, section1, section2);
+        List<Tab> remove = new ArrayList<>();
+        for(Tab t : Sections.getTabs()){
+            if(t.getText().equals("+"))
+                continue;
+            remove.add(t);
+        }
+        Sections.getTabs().removeAll(remove);
 
-        exercice.createPartie(section1.getText());
-        exercice.createPartie(section2.getText());
+        createTab("Partie 1");
+    }
 
-        lastTab = section1;
-        NbSection=1;
-        Sections.getSelectionModel().select(section1);
-        aBoolean = true;
+    public void changeTab(){
+        Partie current = getSelectedPartie();
+        if(current == null)
+            return;
+
+        texte.setText(current.getTexte().getOriginal());
+        aide.setText(current.getIndice().getIndice());
+    }
+
+    public Partie getSelectedPartie(){
+        return exercice.getPartie(Sections.getSelectionModel().getSelectedItem().getText());
     }
 
     public void dialogConfirmNewPrjct() {
-        alert.setTitle("Nouveau");
-        alert.setHeaderText("Voulez vous enregistrer votre exercice avant de le quitter");
-        //alert.setContentText("Choose your option.");
         ButtonType buttonTypeOne = new ButtonType("Oui, sauvegarder");
         ButtonType buttonTypeTwo = new ButtonType("Ne pas sauvegarder");
         ButtonType buttonTypeCancel = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
-        alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeCancel);
-        Optional<ButtonType> result = alert.showAndWait();
+        Optional<ButtonType> result = makeAlert("Nouveau", "Voulez vous enregistrer votre exercice avant de le quitter", buttonTypeOne, buttonTypeTwo, buttonTypeCancel);
         if (result.get() == buttonTypeOne){
             exporter();
         } else if (result.get() == buttonTypeTwo) {
-            initialize(null, null);
+            newExercise();
         }
     }
 
     public void dialogConfirmLeave() {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Nouveau");
-        alert.setHeaderText("Voulez vous enregistrer votre exercice avant de le quitter");
-        //alert.setContentText("Choose your option.");
         ButtonType buttonTypeOne = new ButtonType("Oui, sauvegarder");
         ButtonType buttonTypeTwo = new ButtonType("Ne pas sauvegarder");
         ButtonType buttonTypeCancel = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
-        alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeCancel);
-        Optional<ButtonType> result = alert.showAndWait();
+        Optional<ButtonType> result = makeAlert("Quitter", "Voulez vous enregistrer votre exercice avant de le quitter", buttonTypeOne, buttonTypeTwo, buttonTypeCancel);
         if (result.get() == buttonTypeOne){
             exporter();
         } else if (result.get() == buttonTypeTwo) {
@@ -104,19 +143,69 @@ public class ProfesseurController implements Initializable {
         }
     }
 
-    public void dialogConfirmDeleteSection() {
+    public static Optional<ButtonType> makeAlert(String title, String headerText, ButtonType... btn){
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Supprimer la section");
-        alert.setHeaderText("Etes vous sûr de vouloir supprimer la section ?");
+        alert.setTitle(title);
+        alert.setHeaderText(headerText);
+        //alert.setContentText("Choose your option.");
+        alert.getButtonTypes().setAll(btn);
+        return alert.showAndWait();
+    }
+
+    public void confirmDeleteTab(Tab tab) {
         //alert.setContentText("Choose your option.");
         ButtonType buttonTypeOne = new ButtonType("Oui, supprimer");
         ButtonType buttonTypeCancel = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
-        alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeCancel);
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.get() == buttonTypeOne){
-            aBoolean = false;
-            deleteSection();
+        Optional<ButtonType> result = makeAlert("Supprimer la section", "Etes vous sûr de vouloir supprimer la section \""+ tab.getText() +"\" ?", buttonTypeOne, buttonTypeCancel);
+        if (result.get() == buttonTypeOne)
+            removeTab(tab);
+    }
+
+    public void formNewTab(){
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Nouvelle section");
+        dialog.setHeaderText("Nom de la nouvelle section ?");
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            if (tabNameValidate(result.get())) {
+                createTab(result.get());
+            } else formNewTab();
         }
+    }
+
+    private void createTab(String name){
+        Tab tab = new Tab(name);
+        Tab add = Sections.getTabs().get(Sections.getTabs().size()-1);
+
+        exercice.createPartie(name);
+        Sections.getTabs().remove(add);
+        Sections.getTabs().addAll(tab, add);
+        Sections.getSelectionModel().select(tab);
+        if(Sections.getTabs().size() > 3)
+            tab.setClosable(true);
+        else
+            tab.setClosable(false);
+
+        tab.setOnCloseRequest(event -> {
+            event.consume();
+            confirmDeleteTab(tab);
+        });
+
+        if(Sections.getTabs().size() == 3){
+            for(Tab t : Sections.getTabs()){
+                if(t.getText().equals("+"))
+                    continue;
+                t.setClosable(true);
+            }
+        }
+    }
+
+    private void removeTab(Tab tab){
+        exercice.supprimerPartie(tab.getText());
+        Sections.getTabs().remove(tab);
+
+        if(Sections.getTabs().size() == 2)
+            Sections.getTabs().get(0).setClosable(false);
     }
 
     public void renameSection() {
@@ -126,84 +215,117 @@ public class ProfesseurController implements Initializable {
 
         Optional<String> result = dialog.showAndWait();
         if (result.isPresent()) {
-            if (result.get().length() >= 1) {
-                aBoolean = false;
-                Sections.getSelectionModel().getSelectedItem().setText(result.get());
-            } else renameSection();
+            if (tabNameValidate(result.get())) {
+                Tab tab = Sections.getSelectionModel().getSelectedItem();
+                exercice.getPartie(tab.getText()).setNom(result.get());
+                tab.setText(result.get());
+            }
+            else renameSection();
         }
     }
 
-    public void updateTab() {
-        if (Sections.getSelectionModel().getSelectedItem() != lastTab) {
-            if (Sections.getSelectionModel().getSelectedItem().getText().equals("+")) if (aBoolean == true || NbSection < 1) addSection();
-        }
-        lastTab = Sections.getSelectionModel().getSelectedItem();
-    }
-
-    public void addSection() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Nouvelle section");
-        dialog.setHeaderText("Nom de la nouvelle section ?");
-        //dialog.setContentText("Nom de la nouvelle section :");
-        Optional<String> result = dialog.showAndWait();
-        if (result.isPresent()) {
-            if (result.get().length() >= 1 && !exercice.sectionExiste(result.get())) {
-                Sections.getTabs().addAll(new Tab(result.get()));
-                Sections.getSelectionModel().selectNext();
-                exercice.createPartie(result.get());
-                aBoolean = true;
-                NbSection++;
-            } else addSection();
-        } else {
-            if (NbSection < 1) addSection();
-            else aBoolean = true;
-        }
-    }
-
-    public void deleteSection() {
-        Sections.getTabs().remove(Sections.getSelectionModel().getSelectedItem());
-        Sections.getSelectionModel().selectNext();
-        NbSection--;
-        aBoolean = true;
-        if (Sections.getSelectionModel().getSelectedItem() == SectionAdd) {
-            addSection();
-        }
-    }
-
-    public void cb4() {
-        if (CB4.isSelected()) {
-            Aide.setEditable(true);
-            Aide.setText(null);
-        }
-        else {
-            Aide.setEditable(false);
-            Aide.setText("Cette option est désactivée");
-        }
+    private boolean tabNameValidate(String name){
+        return name.matches("^[a-zA-Z0-9][a-zA-Z0-9 ]*(?<! )$") && !exercice.sectionExiste(name);
     }
 
     public void importer() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Importer un exercice");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Fichier comptatible (.rct)", "*.rct"),
-                new FileChooser.ExtensionFilter("Tous les fichier", "*.*"));
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Fichier exercice (.caft)", "*.caft"));
         File selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
-            say("cc");
+            try {
+                ObjectInputStream ois = new ObjectInputStream(new FileInputStream(selectedFile));
+                Object o = ois.readObject();
+                if(o instanceof Exercice){
+                    ouvrirExercice((Exercice) o);
+                }else{
+                    Alert fileError = new Alert(Alert.AlertType.WARNING);
+                    fileError.setHeaderText("Fichier non compatible");
+                    fileError.setContentText("Le fichier ne peut pas être ouvert");
+                    fileError.show();
+                    return;
+                }
+                ois.close();
+            } catch (IOException | ClassNotFoundException e) {
+                Alert fileError = new Alert(Alert.AlertType.WARNING);
+                fileError.setHeaderText("Fichier non compatible");
+                fileError.setContentText("Le fichier ne peut pas être ouvert");
+                fileError.show();
+                return;
+            }
         }
+    }
+
+    private void ouvrirExercice(Exercice exercice){
+        this.exercice = exercice;
+        ignoreAdd = true;
+
+        consigne.setText(exercice.getConsigne());
+        cb_solution.setSelected(exercice.getSolution().isSolution_autorise());
+        cb_motComplet.setSelected(exercice.isMot_complet());
+        cb_correspondance.setSelected(exercice.isCorrespondance());
+        sensCasse.setSelected(exercice.isSensCasse());
+        sensAccent.setSelected(exercice.isSensAccent());
+
+        if(exercice.getMedia() == null) {
+            player.setVisible(false);
+            importBtn.setVisible(true);
+        }else{
+            player.setVisible(true);
+            importBtn.setVisible(false);
+            exercice.getMedia().initialize(mv, progressSlider);
+        }
+
+        List<Tab> remove = new ArrayList<>();
+        for(Tab t : Sections.getTabs()){
+            if(t.getText().equals("+"))
+                continue;
+            remove.add(t);
+        }
+        Sections.getTabs().removeAll(remove);
+
+        Tab add = Sections.getTabs().get(Sections.getTabs().size()-1);
+        Sections.getTabs().remove(add);
+
+        for (Partie partie : exercice.getParties())
+            Sections.getTabs().add(new Tab(partie.getNom()));
+
+        Sections.getTabs().add(add);
+
+        Sections.getSelectionModel().select(0);
+
+        if(Sections.getTabs().size() >= 3){
+            for(Tab t : Sections.getTabs()){
+                if(t.getText().equals("+"))
+                    continue;
+                t.setClosable(true);
+            }
+        }else if(Sections.getTabs().size() == 2)
+            Sections.getTabs().get(0).setClosable(false);
+
+        changeTab();
     }
 
     public void exporter() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Exporter");
+        fileChooser.setInitialFileName("Nouvel exercice.caft");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichier exercice", "*.caft"));
         File file = fileChooser.showSaveDialog(null);
         if (file != null) {
-            /*try {
-                ImageIO.write(SwingFXUtils.fromFXImage(pic.getImage(),
-                        null), "png", file);
-            } catch (IOException ex) {
-                System.out.println(ex.getMessage());
-            }*/
+            if(!file.getName().endsWith(".caft"))
+                file = new File(file.getAbsolutePath()+".caft");
+            try {
+                FileOutputStream fos = new FileOutputStream(file);
+                ObjectOutputStream oos = new ObjectOutputStream(fos);
+                oos.writeObject(exercice);
+                oos.close();
+                fos.close();
+            }catch (IOException e){
+                e.printStackTrace();
+            }
         }
     }
 
@@ -215,20 +337,18 @@ public class ProfesseurController implements Initializable {
         File selectedFile = fileChooser.showOpenDialog(null);
         if (selectedFile != null) {
             exercice.setMedia(Media.load(selectedFile.getAbsolutePath()));
-            exercice.getMedia().initialize();
-            exercice.getMedia().load(mv);
+            exercice.getMedia().initialize(mv, progressSlider);
             importBtn.setVisible(false);
+            player.setVisible(true);
         }
     }
 
-    public void actuHandicapVisuel() {
-        if (HandicapVisuel.getText() == "Handicap Visuel (actif)") HandicapVisuel.setText("Handicap Visuel (innactif)");
-        else HandicapVisuel.setText("Handicap Visuel (actif)");
-    }
-
-    public void actuHandicapAuditif() {
-        if (HandicapAuditif.getText() == "Handicap Auditif (actif)") HandicapAuditif.setText("Handicap Auditif (innactif)");
-        else HandicapAuditif.setText("Handicap Auditif (actif)");
+    public void supprimerVideo(){
+        if(exercice.getMedia().isPlaying())
+            exercice.getMedia().pause();
+        exercice.setMedia(null);
+        player.setVisible(false);
+        importBtn.setVisible(true);
     }
 
     public void newProject() {
@@ -239,7 +359,106 @@ public class ProfesseurController implements Initializable {
         dialogConfirmLeave();
     }
 
-    public void say(String text) {
-        System.out.println(text);
+    public void textFieldEdited(String newValue){
+        Partie partie = getSelectedPartie();
+        if(partie == null)
+            return;
+
+        partie.getTexte().setOriginal(newValue);
     }
+
+    public void aideTextFieldEdited(String newValue){
+        Partie partie = getSelectedPartie();
+        if(partie == null)
+            return;
+
+        partie.getIndice().setIndice(newValue);
+    }
+
+    public void consigneTextFieldEdited(String newValue){
+        exercice.setConsigne(newValue);
+    }
+
+    //===========================================================================PLAYER CONTROLLER
+
+    public void pausePlay(){
+        if(exercice == null) return;
+
+        if (exercice.getMedia().isPlaying()){
+            exercice.getMedia().pause();
+        } else{
+            exercice.getMedia().play();
+        }
+
+    }
+
+    public void recommencer(){
+        if(exercice == null) return;
+
+        exercice.getMedia().recommencer();
+    }
+
+    public void reculer(){
+        if(exercice == null) return;
+
+        exercice.getMedia().reculer(5);
+    }
+
+    public void avancer(){
+        if(exercice == null) return;
+
+        exercice.getMedia().avancer(5);
+    }
+
+
+    private double lastVolume = 10;
+    public void mute(){
+        if(exercice == null) return;
+
+        if (exercice.getMedia().getVolume() == 0){
+            exercice.getMedia().setVolume(lastVolume/100);
+            volumeSlider.setValue(lastVolume);
+        }else{
+            exercice.getMedia().setVolume(0);
+            volumeSlider.setValue(0);
+        }
+    }
+
+    public void volumeSlider(){
+        if(exercice == null) return;
+
+        lastVolume = volumeSlider.getValue();
+        exercice.getMedia().setVolume(lastVolume/100);
+    }
+
+
+    public void progressBarFin(){
+        if(exercice == null) return;
+        exercice.getMedia().goTo(progressSlider.getValue());
+    }
+
+    public void help(){
+        if(Desktop.isDesktopSupported()){
+            try{
+
+                ClassLoader classLoader = getClass().getClassLoader();
+
+                URL resource = classLoader.getResource("manuel_professeur.pdf");
+                if (resource == null) {
+                    throw new IllegalArgumentException("file is not found!");
+                } else {
+                    Path dungeon_pdf = Files.createTempFile("Reconstitution", ".pdf");
+                    try (InputStream is = getClass().getClassLoader().getResourceAsStream("manuel_professeur.pdf")) {
+                        Files.copy(is, dungeon_pdf, StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    File dungeon = dungeon_pdf.toFile();
+                    Desktop.getDesktop().open(dungeon_pdf.toFile());
+                    dungeon.deleteOnExit();
+                }
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

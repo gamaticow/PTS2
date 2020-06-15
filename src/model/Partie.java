@@ -4,7 +4,6 @@ package model;
  */
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 public class Partie implements Serializable {
 
@@ -39,7 +38,7 @@ public class Partie implements Serializable {
      * @param mot Mot a chercher
      * @return Si le texte a été modifier pour le rafraichir si oui
      */
-    public boolean chercherMot(String mot){
+    public boolean chercherMot(String mot, boolean rechercheMotComplet, boolean casse, boolean accent){
         if(mot == null || mot.equals(""))
             return false;
 
@@ -47,12 +46,12 @@ public class Partie implements Serializable {
             mot = mot.substring(1);
         while (mot.endsWith(" "))
             mot = mot.substring(0, mot.length()-1);
-        if(mot.equals(""))
+        if(mot.isEmpty())
             return false;
-        return texte.chercherMot(mot, 0, true);
+        return texte.chercherMot(mot, 0, rechercheMotComplet, casse, accent);
     }
 
-    public boolean correspondance(String mot){
+    public boolean correspondance(String mot, boolean casse, boolean accent){
         if(mot == null || mot.equals("")) {
             texte.supprimerCorrespondance();
             return true;
@@ -64,7 +63,7 @@ public class Partie implements Serializable {
             mot = mot.substring(0, mot.length()-1);
         if(mot.equals(""))
             return false;
-        return texte.correspondance(mot, 0, true);
+        return texte.correspondance(mot, 0, true, casse, accent);
     }
 
     /**
@@ -83,5 +82,9 @@ public class Partie implements Serializable {
 
     public Texte getTexte(){
         return texte;
+    }
+
+    public void setNom(String nom){
+        this.nom = nom;
     }
 }

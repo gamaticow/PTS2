@@ -9,16 +9,25 @@ import java.util.List;
 
 public class Exercice implements Serializable {
 
-    private String nom;
     private String consigne;
 
     private Media media;
     private List<Partie> parties;
     private Solution solution;
 
+    private boolean mot_complet;
+    private boolean correspondance;
+    private boolean sensCasse;
+    private boolean sensAccent;
+
     public Exercice(){
         parties = new LinkedList<>();
         solution = new Solution();
+
+        mot_complet = false;
+        correspondance = false;
+        sensCasse = false;
+        sensAccent = false;
     }
 
     public List<Partie> getParties(){
@@ -45,6 +54,22 @@ public class Exercice implements Serializable {
         return media;
     }
 
+    public boolean isMot_complet(){
+        return mot_complet;
+    }
+
+    public boolean isCorrespondance(){
+        return correspondance;
+    }
+
+    public boolean isSensCasse() {
+        return sensCasse;
+    }
+
+    public boolean isSensAccent() {
+        return sensAccent;
+    }
+
     //================================================================================================FONCTIONS ETUDIANT
 
     public boolean isSolutionUtilise(){
@@ -67,11 +92,37 @@ public class Exercice implements Serializable {
         parties.add(new Partie(nom));
     }
 
+    public void supprimerPartie(String nom){
+        Partie remove = null;
+        for (Partie partie : parties){
+            if(partie.getNom().equalsIgnoreCase(nom))
+                remove = partie;
+        }
+        if(remove != null)
+            parties.remove(remove);
+    }
+
     public void setConsigne(String consigne){
         this.consigne = consigne;
     }
 
     public void setMedia(Media media){
         this.media = media;
+    }
+
+    public void setMot_complet(boolean value){
+        mot_complet = value;
+    }
+
+    public void setCorrespondance(boolean value){
+        correspondance = value;
+    }
+
+    public void setSensCasse(boolean sensCasse) {
+        this.sensCasse = sensCasse;
+    }
+
+    public void setSensAccent(boolean sensAccent) {
+        this.sensAccent = sensAccent;
     }
 }

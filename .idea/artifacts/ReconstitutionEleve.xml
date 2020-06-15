@@ -6,6 +6,12 @@
         <option name="appClass" value="core.ReconstitutionEleve" />
         <option name="description" value="" />
         <option name="htmlPlaceholderId" value="" />
+        <option name="icons">
+          <JavaFxApplicationIcons>
+            <option name="linuxIcon" value="$PROJECT_DIR$/res/icon.png" />
+            <option name="windowsIcon" value="$PROJECT_DIR$/res/reconstitution.ico" />
+          </JavaFxApplicationIcons>
+        </option>
         <option name="title" value="" />
         <option name="vendor" value="" />
         <option name="version" value="" />
@@ -14,7 +20,7 @@
     <root id="root">
       <element id="module-output" name="eleve" />
       <element id="module-output" name="Reconstitution" />
-      <element id="archive" name="ReconstitutionEleve.jar">
+      <element id="archive" name="ReconstitutionEtudiant.jar">
         <element id="directory" name="META-INF">
           <element id="file-copy" path="$PROJECT_DIR$/eleve/META-INF/MANIFEST.MF" />
         </element>

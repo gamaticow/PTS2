@@ -2,31 +2,32 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.media.MediaView?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ProfesseurController">
     <children>
         <TabPane fx:id="Sections" layoutX="41.0" layoutY="46.0" prefHeight="25.0" prefWidth="613.0" tabClosingPolicy="UNAVAILABLE">
             <tabs>
-                <Tab fx:id="Section1" onSelectionChanged="#updateTab" text="Section 1" />
-            <Tab fx:id="Section11" onSelectionChanged="#updateTab" text="Section 2" />
-                <Tab fx:id="SectionAdd" onSelectionChanged="#updateTab" text="+" />
+                <Tab closable="false" text="+" />
             </tabs>
         </TabPane>
         <VBox alignment="CENTER_LEFT" layoutX="41.0" layoutY="514.0" prefHeight="174.0" prefWidth="613.0">
@@ -47,17 +48,70 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                     <children>
-                        <CheckBox fx:id="CB1" mnemonicParsing="false" text="Sensibilité aux majuscules" />
-                        <CheckBox fx:id="CB2" mnemonicParsing="false" text="Bouton solution" GridPane.columnIndex="1" />
-                        <CheckBox fx:id="CB3" mnemonicParsing="false" text="Remplacement partiel d'un mot" GridPane.rowIndex="1" />
-                        <CheckBox fx:id="CB4" mnemonicParsing="false" onAction="#cb4" selected="true" text="Bouton d'aide" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <CheckBox fx:id="CB5" mnemonicParsing="false" text="Correspondance en temps réel" GridPane.rowIndex="2" />
-                        <CheckBox fx:id="CB6" mnemonicParsing="false" text="Sensibilité aux accents" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <CheckBox fx:id="sensCasse" mnemonicParsing="false" text="Sensibilité aux majuscules" GridPane.columnIndex="1" />
+                        <CheckBox fx:id="cb_solution" mnemonicParsing="false" text="Bouton solution" />
+                        <CheckBox fx:id="cb_motComplet" mnemonicParsing="false" text="Remplacement partiel d'un mot" GridPane.rowIndex="1" />
+                        <CheckBox fx:id="cb_correspondance" mnemonicParsing="false" text="Correspondance en temps réel" GridPane.rowIndex="2" />
+                        <CheckBox fx:id="sensAccent" mnemonicParsing="false" text="Sensibilité aux accents" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                     </children>
                 </GridPane>
             </children>
         </VBox>
-        <MediaView fx:id="mv" fitHeight="320.0" fitWidth="480.0" layoutX="746.0" layoutY="103.0" />
+        <VBox fx:id="player" layoutX="665.0" layoutY="47.0" prefHeight="380.0" prefWidth="607.0" AnchorPane.bottomAnchor="269.0" AnchorPane.rightAnchor="0.0">
+            <children>
+                <HBox prefHeight="100.0" prefWidth="200.0">
+                    <children>
+                        <MediaView fx:id="mv" fitHeight="320.0" fitWidth="480.0">
+                            <HBox.margin>
+                                <Insets left="90.0" />
+                            </HBox.margin>
+                        </MediaView>
+                        <VBox prefHeight="320.0" prefWidth="0.0">
+                            <children>
+                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="volume">
+                                    <VBox.margin>
+                                        <Insets left="5.0" top="200.0" />
+                                    </VBox.margin>
+                                </Text>
+                                <Slider fx:id="volumeSlider" maxHeight="250.0" maxWidth="222.0" onMouseReleased="#volumeSlider" orientation="VERTICAL" prefHeight="142.0" prefWidth="44.0" value="100.0">
+                                    <VBox.margin>
+                                        <Insets bottom="5.0" />
+                                    </VBox.margin>
+                                </Slider>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+                <Slider fx:id="progressSlider" onMouseReleased="#progressBarFin" prefHeight="14.0" prefWidth="579.0">
+                    <VBox.margin>
+                        <Insets left="10.0" />
+                    </VBox.margin>
+                </Slider>
+                <ButtonBar prefHeight="46.0" prefWidth="599.0">
+                    <buttons>
+                        <Button fx:id="playPause" mnemonicParsing="false" onAction="#pausePlay" text="▶||">
+                            <font>
+                                <Font size="21.0" />
+                            </font>
+                        </Button>
+                        <Button fx:id="recommencer" mnemonicParsing="false" onAction="#recommencer" prefHeight="46.0" text="Recommencer">
+                            <font>
+                                <Font size="11.0" />
+                            </font></Button>
+                        <Button fx:id="reculer" mnemonicParsing="false" onAction="#reculer" prefHeight="50.0" prefWidth="144.0" text="Reculer " />
+                        <Button fx:id="avancer" mnemonicParsing="false" onAction="#avancer" prefHeight="46.0" text="Avancer" />
+                        <Button fx:id="mute" minWidth="11.0" mnemonicParsing="false" onAction="#mute" prefHeight="118.0" text="mute" />
+                    </buttons>
+                </ButtonBar>
+            <HBox prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <Pane prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                  <Button mnemonicParsing="false" onAction="#supprimerVideo" text="Supprimer ce média" />
+                  <Pane prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+               </children>
+            </HBox>
+            </children>
+        </VBox>
         <VBox alignment="CENTER_LEFT" layoutX="746.0" layoutY="501.0" prefHeight="200.0" prefWidth="480.0">
             <children>
                 <Label text="Aide :">
@@ -65,7 +119,7 @@
                         <Font name="System Bold" size="16.0" />
                     </font>
                 </Label>
-                <TextArea fx:id="Aide" prefHeight="100.0" prefWidth="480.0">
+                <TextArea fx:id="aide" prefHeight="100.0" prefWidth="480.0">
                     <VBox.margin>
                         <Insets bottom="20.0" />
                     </VBox.margin>
@@ -75,13 +129,13 @@
                         <Font name="System Bold" size="16.0" />
                     </font>
                 </Label>
-                <TextArea fx:id="Consigne" prefHeight="100.0" prefWidth="480.0">
+                <TextArea fx:id="consigne" prefHeight="100.0" prefWidth="480.0">
                <VBox.margin>
                   <Insets bottom="20.0" />
                </VBox.margin></TextArea>
             </children>
         </VBox>
-        <MenuBar prefHeight="25.0" prefWidth="1300.0">
+        <MenuBar prefHeight="25.0" prefWidth="1280.0">
             <menus>
                 <Menu mnemonicParsing="false" text="Version Professeur" />
                 <Menu mnemonicParsing="false" text="Exercice">
@@ -94,14 +148,13 @@
                 </Menu>
                 <Menu mnemonicParsing="false" text="Paramètres">
                     <items>
-                        <MenuItem fx:id="HandicapVisuel" mnemonicParsing="false" onAction="#actuHandicapVisuel" text="Handicap Visuel (innactif)" />
-                        <MenuItem fx:id="HandicapAuditif" mnemonicParsing="false" onAction="#actuHandicapAuditif" text="Handicap Auditif (innactif)" />
+                        <MenuItem mnemonicParsing="false" text="Handicap Visuel" />
+                        <MenuItem mnemonicParsing="false" text="Handicap Auditif" />
                     </items>
                 </Menu>
             </menus>
         </MenuBar>
-        <Button fx:id="importBtn" layoutX="927.0" layoutY="423.0" mnemonicParsing="false" onAction="#importerVideo" text="Importer un média" />
-      <TextField alignment="TOP_LEFT" layoutX="41.0" layoutY="71.0" prefHeight="354.0" prefWidth="613.0" />
+        <Button fx:id="importBtn" layoutX="908.0" layoutY="223.0" mnemonicParsing="false" onAction="#importerVideo" text="Importer un média" />
       <HBox alignment="TOP_RIGHT" layoutX="41.0" layoutY="423.0" prefHeight="32.0" prefWidth="613.0">
          <children>
             <Button fx:id="renameBtn" mnemonicParsing="false" onAction="#renameSection" text="Renommer la section">
@@ -109,12 +162,9 @@
                   <Insets top="5.0" />
                </HBox.margin>
             </Button>
-            <Button fx:id="delSection" mnemonicParsing="false" onAction="#dialogConfirmDeleteSection" text="Supprimer la section">
-               <HBox.margin>
-                  <Insets left="5.0" top="5.0" />
-               </HBox.margin>
-            </Button>
          </children>
       </HBox>
+      <TextArea fx:id="texte" layoutX="41.0" layoutY="71.0" prefHeight="356.0" prefWidth="613.0" wrapText="true" />
+      <Button layoutX="1258.0" mnemonicParsing="false" onMouseClicked="#help" text="?" />
     </children>
 </AnchorPane>

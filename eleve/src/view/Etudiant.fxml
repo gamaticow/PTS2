@@ -41,7 +41,7 @@
             </HBox>
          </children>
       </VBox>
-      <VBox layoutX="686.0" layoutY="80.0" prefHeight="380.0" prefWidth="607.0" AnchorPane.bottomAnchor="350.0" AnchorPane.rightAnchor="3.0">
+      <VBox fx:id="player" layoutX="686.0" layoutY="80.0" prefHeight="380.0" prefWidth="607.0" AnchorPane.bottomAnchor="350.0" AnchorPane.rightAnchor="3.0">
          <children>
             <HBox prefHeight="100.0" prefWidth="200.0">
                <children>
@@ -129,5 +129,6 @@
         </menus>
       </MenuBar>
       <TextArea fx:id="texte" editable="false" layoutX="41.0" layoutY="80.0" prefHeight="432.0" prefWidth="638.0" wrapText="true" />
+      <Button layoutX="1278.0" mnemonicParsing="false" onMouseClicked="#help" text="?" />
    </children>
 </AnchorPane>

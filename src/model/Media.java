@@ -15,7 +15,7 @@ import java.nio.file.Paths;
 public class Media implements Serializable {
 
     private byte[] content;
-    private final String extention;
+    private String extention;
     protected double duration;
 
     protected String tempFile;
@@ -114,5 +114,15 @@ public class Media implements Serializable {
 
     public void goTo(double percentage) {
         mediaPlayer.seek(Duration.seconds((percentage * mediaPlayer.getTotalDuration().toSeconds()) / 100));
+    }
+
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.writeObject(content);
+        oos.writeUTF(extention);
+    }
+
+    private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        content = (byte[]) ois.readObject();
+        extention = ois.readUTF();
     }
 }

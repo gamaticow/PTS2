@@ -20,7 +20,7 @@ public class Indice implements Serializable {
      * @return True si l'indice est utilisable, false sinon
      */
     public boolean indiceUtilisable(){
-        return indice != null;
+        return indice != null && !indice.isEmpty();
     }
 
     public boolean indiceUtilise() {

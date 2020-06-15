@@ -8,6 +8,23 @@ import java.io.Serializable;
 public class Texte implements Serializable {
 
     private static final char CARACTERE_DE_SUBSTITUTION = '#';
+    private static final String REGEX = "[a-zA-Z0-9áàâäãåçéèêëíìîïñóòôöõúùûüýÿÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸ]";
+    private static final String A_MIN = "[aáàâäãå]";
+    private static final String A_MAJ = "[AÁÀÂÄÃÅ]";
+    private static final String E_MIN = "[eéèêë]";
+    private static final String E_MAJ = "[EÉÈÊË]";
+    private static final String I_MIN = "[iíìîï]";
+    private static final String I_MAJ = "[IÍÌÎÏ]";
+    private static final String O_MIN = "[oóòôöõ]";
+    private static final String O_MAJ = "[OÓÒÔÖÕ]";
+    private static final String U_MIN = "[uúùûü]";
+    private static final String U_MAJ = "[UÚÙÛÜ]";
+    private static final String Y_MIN = "[yýÿ]";
+    private static final String Y_MAJ = "[YÝŸ]";
+    private static final String C_MIN = "[cç]";
+    private static final String C_MAJ = "[CÇ]";
+    private static final String N_MIN = "[nñ]";
+    private static final String N_MAJ = "[NÑ]";
 
     private String texte;
     private String texte_decouvert;
@@ -19,13 +36,10 @@ public class Texte implements Serializable {
      * @return Le texte a affiché dans la version étudiant
      */
     public String getTexteCache(){
-        /*String texte = "First, I wake up. Then, I get dressed. I walk to school. I do not ride a bike. I do not ride the bus.\nI like to go to school. It rains. I do not like rain. I eat lunch. I eat a sandwich and an apple.\n" +
-                "\n" +
-                "I play outside. I like to play. I read a book. I like to read books. I walk home. I do not like walking home.\nMy mother cooks soup for dinner. The soup is hot. Then, I go to bed. I do not like to go to bed.";*/
         if(texte_decouvert == null){
             StringBuilder sb = new StringBuilder();
             for(int i = 0; i < texte.length(); i++){
-                if(String.valueOf(texte.charAt(i)).matches("[A-Za-z0-9]")){
+                if(String.valueOf(texte.charAt(i)).matches(REGEX)){
                     sb.append(CARACTERE_DE_SUBSTITUTION);
                 }else {
                     sb.append(texte.charAt(i));
@@ -49,7 +63,7 @@ public class Texte implements Serializable {
      *     <li>false : Aucune occurence a été trouvé</li>
      * </ul>
      */
-    public boolean chercherMot(String mot, int debut_recherche, boolean rechercheMotComplet){
+    public boolean chercherMot(String mot, int debut_recherche, boolean rechercheMotComplet, boolean casse, boolean accent){
         correspondance = null;
 
         int debut =0;
@@ -61,8 +75,8 @@ public class Texte implements Serializable {
                 if (!motIncomplet(debut, caractere_trouver)){
                     caractere_trouver=0;
                     continue;
-                }else if(rechercheMotComplet && !(debut == 0 || !String.valueOf(texte.charAt(debut-1)).matches("[A-Za-z0-9]")) ||
-                        !(debut+caractere_trouver == texte_decouvert.length() || !String.valueOf(texte.charAt(debut+caractere_trouver)).matches("[A-Za-z0-9]"))){
+                }else if(rechercheMotComplet && (!(debut == 0 || !String.valueOf(texte.charAt(debut-1)).matches("[A-Za-z0-9]")) ||
+                        !(debut+caractere_trouver == texte_decouvert.length() || !String.valueOf(texte.charAt(debut+caractere_trouver)).matches("[A-Za-z0-9]")))){
                     caractere_trouver=0;
                     continue;
                 }
@@ -71,7 +85,7 @@ public class Texte implements Serializable {
             }else {
                 if(i == texte_decouvert.length())
                     break;
-                if (texte.charAt(i) == mot.charAt(caractere_trouver)) {
+                if (caractereIdentique(mot.charAt(caractere_trouver), i, casse, accent)) {
                     if (caractere_trouver == 0) {
                         debut = i;
                     }
@@ -91,13 +105,13 @@ public class Texte implements Serializable {
                     sb.append(texte_decouvert.charAt(i));
             }
             texte_decouvert = sb.toString();
-            chercherMot(mot, debut+caractere_trouver, rechercheMotComplet);
+            chercherMot(mot, debut+caractere_trouver, rechercheMotComplet, casse, accent);
             return true;
         }
         return false;
     }
 
-    public boolean correspondance(String mot, int debut_recherche, boolean first){
+    public boolean correspondance(String mot, int debut_recherche, boolean first, boolean casse, boolean accent){
         int debut =0;
         int caractere_trouver=0;
         boolean trouver = false;
@@ -105,7 +119,7 @@ public class Texte implements Serializable {
         for (int i=debut_recherche;i<=texte_decouvert.length();i++){
             if(i == texte_decouvert.length())
                 break;
-            if (texte.charAt(i) == mot.charAt(caractere_trouver)) {
+            if (caractereIdentique(mot.charAt(caractere_trouver), i, casse, accent)) {
                 if (caractere_trouver == 0) {
                     debut = i;
                 }
@@ -136,10 +150,39 @@ public class Texte implements Serializable {
                     sb.append(correspondance.charAt(i));
             }
             correspondance = sb.toString();
-            correspondance(mot, debut+caractere_trouver, false);
+            correspondance(mot, debut+caractere_trouver, false, casse, accent);
             return true;
         }
         return false;
+    }
+
+    public boolean caractereIdentique(char c1, int position, boolean casse, boolean accent){
+        char c2 = texte.charAt(position);
+        if(casse) {
+            c1 = Character.toUpperCase(c1);
+            c2 = Character.toUpperCase(c2);
+        }
+        if(!accent)
+            return c1 == c2;
+        else{
+            if(c1 == c2)
+                return true;
+            else if((String.valueOf(c1).matches(A_MIN) && String.valueOf(c2).matches(A_MIN)) || (String.valueOf(c1).matches(A_MAJ) && String.valueOf(c2).matches(A_MAJ)))
+                return true;
+            else if((String.valueOf(c1).matches(E_MIN) && String.valueOf(c2).matches(E_MIN)) || (String.valueOf(c1).matches(E_MAJ) && String.valueOf(c2).matches(E_MAJ)))
+                return true;
+            else if((String.valueOf(c1).matches(I_MIN) && String.valueOf(c2).matches(I_MIN)) || (String.valueOf(c1).matches(I_MAJ) && String.valueOf(c2).matches(I_MAJ)))
+                return true;
+            else if((String.valueOf(c1).matches(O_MIN) && String.valueOf(c2).matches(O_MIN)) || (String.valueOf(c1).matches(O_MAJ) && String.valueOf(c2).matches(O_MAJ)))
+                return true;
+            else if((String.valueOf(c1).matches(U_MIN) && String.valueOf(c2).matches(U_MIN)) || (String.valueOf(c1).matches(U_MAJ) && String.valueOf(c2).matches(U_MAJ)))
+                return true;
+            else if((String.valueOf(c1).matches(Y_MIN) && String.valueOf(c2).matches(Y_MIN)) || (String.valueOf(c1).matches(Y_MAJ) && String.valueOf(c2).matches(Y_MAJ)))
+                return true;
+            else if((String.valueOf(c1).matches(C_MIN) && String.valueOf(c2).matches(C_MIN)) || (String.valueOf(c1).matches(C_MAJ) && String.valueOf(c2).matches(C_MAJ)))
+                return true;
+            else return (String.valueOf(c1).matches(N_MIN) && String.valueOf(c2).matches(N_MIN)) || (String.valueOf(c1).matches(N_MAJ) && String.valueOf(c2).matches(N_MAJ));
+        }
     }
 
     public void supprimerCorrespondance(){
