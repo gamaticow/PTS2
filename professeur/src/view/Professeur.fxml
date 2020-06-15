@@ -23,6 +23,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
+<?import javafx.scene.image.ImageView?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="720.0" prefWidth="1280.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ProfesseurController">
     <children>
         <TabPane fx:id="Sections" layoutX="41.0" layoutY="46.0" prefHeight="25.0" prefWidth="613.0" tabClosingPolicy="UNAVAILABLE">
@@ -148,8 +149,14 @@
                 </Menu>
                 <Menu mnemonicParsing="false" text="Paramètres">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Handicap Visuel" />
-                        <MenuItem mnemonicParsing="false" text="Handicap Auditif" />
+                        <MenuItem mnemonicParsing="false" text="Handicap Visuel">
+                        <graphic>
+                            <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" fx:id="hv" />
+                        </graphic></MenuItem>
+                        <MenuItem mnemonicParsing="false" text="Handicap Auditif">
+                        <graphic>
+                            <ImageView fitHeight="50.0" fitWidth="50.0" pickOnBounds="true" preserveRatio="true" fx:id="ha" />
+                        </graphic></MenuItem>
                     </items>
                 </Menu>
             </menus>

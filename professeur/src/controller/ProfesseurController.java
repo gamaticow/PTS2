@@ -1,10 +1,13 @@
 package controller;
 
+import core.ReconstitutionProfesseur;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.MediaView;
 import javafx.stage.FileChooser;
@@ -42,6 +45,8 @@ public class ProfesseurController implements Initializable {
     public TextArea aide;
     public TextArea consigne;
     public VBox player;
+    public ImageView ha;
+    public ImageView hv;
 
     private Exercice exercice;
 
@@ -77,6 +82,9 @@ public class ProfesseurController implements Initializable {
         cb_correspondance.selectedProperty().addListener((observable, oldValue, newValue) -> exercice.setCorrespondance(newValue));
         sensCasse.selectedProperty().addListener((observable, oldValue, newValue) -> exercice.setSensCasse(newValue));
         sensAccent.selectedProperty().addListener((observable, oldValue, newValue) -> exercice.setSensAccent(newValue));
+
+        hv.setImage(new javafx.scene.image.Image(ReconstitutionProfesseur.class.getClassLoader().getResourceAsStream("hv.png")));
+        ha.setImage(new Image(ReconstitutionProfesseur.class.getClassLoader().getResourceAsStream("ha.png")));
     }
 
     public void newExercise(){

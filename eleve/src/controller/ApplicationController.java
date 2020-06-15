@@ -11,6 +11,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
@@ -44,6 +46,8 @@ public class ApplicationController implements Initializable {
     @FXML private Button validerProposition;
     @FXML private TextField entrerTexte;
     @FXML private VBox player;
+    @FXML private ImageView hv;
+    @FXML private ImageView ha;
 
     //Exercice en cours par l'etudiant
     //Si null aucun exercice n'est chargé
@@ -139,6 +143,9 @@ public class ApplicationController implements Initializable {
             if (getSelectedPartie().correspondance(newValue, exercice.isSensCasse(), exercice.isSensAccent())) rafraichirTexte();
             rafraichirTexte();
         });
+
+        hv.setImage(new Image(ReconstitutionEleve.class.getClassLoader().getResourceAsStream("hv.png")));
+        ha.setImage(new Image(ReconstitutionEleve.class.getClassLoader().getResourceAsStream("ha.png")));
     }
 
     public void pausePlay(){
